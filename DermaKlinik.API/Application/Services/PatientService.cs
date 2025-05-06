@@ -22,7 +22,7 @@ namespace DermaKlinik.API.Application.Services
             return await _patientRepository.GetActivePatientsAsync();
         }
 
-        public async Task<Patient?> GetPatientByIdAsync(int id)
+        public async Task<Patient?> GetPatientByIdAsync(Guid id)
         {
             return await _patientRepository.GetByIdAsync(id);
         }
@@ -51,7 +51,7 @@ namespace DermaKlinik.API.Application.Services
             await _patientRepository.UpdateAsync(patient);
         }
 
-        public async Task DeletePatientAsync(int id)
+        public async Task DeletePatientAsync(Guid id)
         {
             var patient = await _patientRepository.GetByIdAsync(id);
             if (patient == null)
@@ -60,6 +60,23 @@ namespace DermaKlinik.API.Application.Services
             patient.IsActive = false;
             patient.UpdatedAt = DateTime.UtcNow;
             await _patientRepository.UpdateAsync(patient);
+        }
+
+        public async Task<Patient?> GetByIdAsync(Guid id)
+        {
+            return await _patientRepository.GetByIdAsync(id);
+        }
+
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var patient = await _patientRepository.GetByIdAsync(id);
+            if (patient == null)
+            {
+                return false;
+            }
+
+            await _patientRepository.DeleteAsync(patient);
+            return true;
         }
     }
 } 

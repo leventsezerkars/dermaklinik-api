@@ -6,6 +6,7 @@ using DermaKlinik.API.Application.Features.Patients.Commands;
 using MediatR;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
 
 namespace DermaKlinik.API.Presentation.Controllers
 {
@@ -39,7 +40,7 @@ namespace DermaKlinik.API.Presentation.Controllers
 
         // GET: api/Patients/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Patient>>> GetPatient(int id)
+        public async Task<ActionResult<ApiResponse<Patient>>> GetPatient(Guid id)
         {
             var query = new GetPatientByIdQuery(id);
             var response = await _mediator.Send(query);
@@ -64,22 +65,20 @@ namespace DermaKlinik.API.Presentation.Controllers
 
         // PUT: api/Patients/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<Patient>>> UpdatePatient(int id, UpdatePatientCommand command)
+        public async Task<ActionResult<ApiResponse<Patient>>> Update(Guid id, UpdatePatientCommand command)
         {
             if (id != command.Id)
+            {
                 return BadRequest(ApiResponse<Patient>.ErrorResult("ID uyuşmazlığı"));
+            }
 
             var response = await _mediator.Send(command);
-
-            if (!response.Success)
-                return StatusCode(response.StatusCode, response);
-
             return Ok(response);
         }
 
         // DELETE: api/Patients/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse<bool>>> DeletePatient(int id)
+        public async Task<ActionResult<ApiResponse<bool>>> DeletePatient(Guid id)
         {
             var command = new DeletePatientCommand(id);
             var response = await _mediator.Send(command);

@@ -6,10 +6,12 @@ namespace DermaKlinik.API.Core.Interfaces
     {
         Task<IEnumerable<Patient>> GetAllPatientsAsync();
         Task<IEnumerable<Patient>> GetActivePatientsAsync();
-        Task<Patient?> GetPatientByIdAsync(int id);
+        Task<Patient?> GetPatientByIdAsync(Guid id);
         Task<Patient?> GetPatientByEmailAsync(string email);
         Task<Patient> CreatePatientAsync(Patient patient);
         Task UpdatePatientAsync(Patient patient);
-        Task DeletePatientAsync(int id);
+        Task DeletePatientAsync(Guid id);
+        Task<Patient?> GetByIdAsync(Guid id);
+        Task<bool> DeleteAsync(Guid id);
     }
 } 

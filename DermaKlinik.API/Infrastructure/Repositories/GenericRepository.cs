@@ -1,3 +1,4 @@
+using DermaKlinik.API.Core.Entities;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -5,10 +6,10 @@ using System.Linq.Expressions;
 
 namespace DermaKlinik.API.Infrastructure.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         protected readonly ApplicationDbContext _context;
-        private readonly DbSet<T> _dbSet;
+        protected readonly DbSet<T> _dbSet;
 
         public GenericRepository(ApplicationDbContext context)
         {
@@ -16,14 +17,19 @@ namespace DermaKlinik.API.Infrastructure.Repositories
             _dbSet = context.Set<T>();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public IQueryable<T> GetAll()
         {
-            return await _dbSet.FindAsync(id);
+            return _dbSet.AsQueryable();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
+        }
+
+        public async Task<T?> GetByIdAsync(Guid id)
+        {
+            return await _dbSet.FindAsync(id);
         }
 
         public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression)
@@ -34,29 +40,35 @@ namespace DermaKlinik.API.Infrastructure.Repositories
         public async Task<T> AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
-            await _context.SaveChangesAsync();
             return entity;
         }
 
         public async Task UpdateAsync(T entity)
         {
             _dbSet.Update(entity);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(T entity)
         {
-            var entity = await GetByIdAsync(id);
-            if (entity != null)
+            if (entity is AuditableEntity auditableEntity)
+            {
+                auditableEntity.IsDeleted = true;
+                await UpdateAsync(entity);
+            }
+            else
             {
                 _dbSet.Remove(entity);
-                await _context.SaveChangesAsync();
             }
         }
 
-        public async Task<bool> ExistsAsync(int id)
+        public async Task HardDeleteAsync(T entity)
         {
-            return await _dbSet.FindAsync(id) != null;
+            _dbSet.Remove(entity);
+        }
+
+        public async Task<bool> ExistsAsync(Guid id)
+        {
+            return await _dbSet.AnyAsync(e => e.Id == id);
         }
     }
 } 

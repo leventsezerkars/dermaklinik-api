@@ -1,15 +1,17 @@
-using System.Linq.Expressions;
+using DermaKlinik.API.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DermaKlinik.API.Core.Interfaces
 {
-    public interface IGenericRepository<T> where T : class
+    public interface IGenericRepository<T> where T : BaseEntity
     {
-        Task<T?> GetByIdAsync(int id);
+        IQueryable<T> GetAll();
         Task<IEnumerable<T>> GetAllAsync();
-        Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> expression);
+        Task<T?> GetByIdAsync(Guid id);
         Task<T> AddAsync(T entity);
         Task UpdateAsync(T entity);
-        Task DeleteAsync(int id);
-        Task<bool> ExistsAsync(int id);
+        Task DeleteAsync(T entity);
+        Task HardDeleteAsync(T entity);
+        Task<bool> ExistsAsync(Guid id);
     }
 } 

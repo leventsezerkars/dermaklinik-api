@@ -8,7 +8,7 @@ namespace DermaKlinik.API.Application.Features.Patients.Commands.Validators
         public UpdatePatientCommandValidator()
         {
             RuleFor(x => x.Id)
-                .GreaterThan(0).WithMessage("Geçerli bir ID giriniz");
+                .NotEmpty().WithMessage("Hasta ID'si boş olamaz");
 
             RuleFor(x => x.FirstName)
                 .NotEmpty().WithMessage("Ad alanı boş olamaz")

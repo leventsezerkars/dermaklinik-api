@@ -2,10 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace DermaKlinik.API.Core.Entities
 {
-    public class User
+    public class User : AuditableEntity
     {
-        public int Id { get; set; }
-        
         [Required]
         [MaxLength(50)]
         public string FirstName { get; set; } = null!;
@@ -26,8 +24,6 @@ namespace DermaKlinik.API.Core.Entities
         [MaxLength(20)]
         public string Role { get; set; } = "User";
         
-        public bool IsActive { get; set; } = true;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastLoginAt { get; set; }
     }
 } 
