@@ -7,7 +7,7 @@ namespace DermaKlinik.API.Core.Interfaces
     public interface IUnitOfWork : IDisposable
     {
         IPatientRepository Patients { get; }
-        IGenericRepository<User> Users { get; }
+        IUserRepository Users { get; }
         Task<int> CompleteAsync();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();

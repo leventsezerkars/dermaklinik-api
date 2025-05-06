@@ -13,7 +13,7 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
         private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
         private IPatientRepository _patients;
-        private IGenericRepository<User> _users;
+        private IUserRepository _users;
         private bool _disposed;
 
         public UnitOfWork(ApplicationDbContext context)
@@ -22,7 +22,7 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
         }
 
         public IPatientRepository Patients => _patients ??= new PatientRepository(_context);
-        public IGenericRepository<User> Users => _users ??= new GenericRepository<User>(_context);
+        public IUserRepository Users => _users ??= new UserRepository(_context);
 
         public async Task<int> CompleteAsync()
         {
