@@ -32,9 +32,9 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<ActionResult<ApiResponse<bool>>> Logout()
+        public ActionResult<ApiResponse<bool>> Logout()
         {
-            var response = await _authService.LogoutAsync();
+            var response = _authService.Logout();
             return Ok(response);
         }
     }

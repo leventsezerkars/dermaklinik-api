@@ -11,7 +11,7 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        private IDbContextTransaction _transaction;
+        private IDbContextTransaction? _transaction;
         private IPatientRepository _patients;
         private IGenericRepository<User> _users;
         private bool _disposed;
@@ -39,7 +39,10 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
             try
             {
                 await _context.SaveChangesAsync();
-                await _transaction?.CommitAsync();
+                if (_transaction != null)
+                {
+                    await _transaction.CommitAsync();
+                }
             }
             catch
             {
@@ -58,9 +61,9 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
 
         public async Task RollbackTransactionAsync()
         {
-            await _transaction?.RollbackAsync();
             if (_transaction != null)
             {
+                await _transaction.RollbackAsync();
                 _transaction.Dispose();
                 _transaction = null;
             }

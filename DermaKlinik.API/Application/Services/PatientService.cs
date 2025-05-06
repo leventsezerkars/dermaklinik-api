@@ -48,7 +48,7 @@ namespace DermaKlinik.API.Application.Services
                 throw new KeyNotFoundException($"Patient with ID {patient.Id} not found.");
 
             patient.UpdatedAt = DateTime.UtcNow;
-            await _patientRepository.UpdateAsync(patient);
+            _patientRepository.Update(patient);
         }
 
         public async Task DeletePatientAsync(Guid id)
@@ -59,7 +59,7 @@ namespace DermaKlinik.API.Application.Services
 
             patient.IsActive = false;
             patient.UpdatedAt = DateTime.UtcNow;
-            await _patientRepository.UpdateAsync(patient);
+            _patientRepository.Update(patient);
         }
 
         public async Task<Patient?> GetByIdAsync(Guid id)
@@ -75,7 +75,7 @@ namespace DermaKlinik.API.Application.Services
                 return false;
             }
 
-            await _patientRepository.DeleteAsync(patient);
+            _patientRepository.Delete(patient);
             return true;
         }
     }

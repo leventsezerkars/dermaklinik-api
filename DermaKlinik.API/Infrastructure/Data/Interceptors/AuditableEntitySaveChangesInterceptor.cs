@@ -16,13 +16,19 @@ namespace DermaKlinik.API.Infrastructure.Data.Interceptors
 
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
         {
-            UpdateEntities(eventData.Context);
+            if (eventData.Context != null)
+            {
+                UpdateEntities(eventData.Context);
+            }
             return base.SavingChanges(eventData, result);
         }
 
         public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
         {
-            UpdateEntities(eventData.Context);
+            if (eventData.Context != null)
+            {
+                UpdateEntities(eventData.Context);
+            }
             return await base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 

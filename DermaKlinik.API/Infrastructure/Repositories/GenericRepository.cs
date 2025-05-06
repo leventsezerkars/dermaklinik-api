@@ -43,17 +43,17 @@ namespace DermaKlinik.API.Infrastructure.Repositories
             return entity;
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _dbSet.Update(entity);
         }
 
-        public async Task DeleteAsync(T entity)
+        public void Delete(T entity)
         {
             if (entity is AuditableEntity auditableEntity)
             {
                 auditableEntity.IsDeleted = true;
-                await UpdateAsync(entity);
+                Update(entity);
             }
             else
             {
@@ -61,7 +61,7 @@ namespace DermaKlinik.API.Infrastructure.Repositories
             }
         }
 
-        public async Task HardDeleteAsync(T entity)
+        public void HardDelete(T entity)
         {
             _dbSet.Remove(entity);
         }

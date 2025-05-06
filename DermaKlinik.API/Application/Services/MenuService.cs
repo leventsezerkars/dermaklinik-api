@@ -60,7 +60,7 @@ namespace DermaKlinik.API.Application.Services
             if (existingMenu == null)
                 throw new KeyNotFoundException($"Menu with ID {menu.Id} not found.");
 
-            await _menuRepository.UpdateAsync(menu);
+            _menuRepository.Update(menu);
             await _unitOfWork.CompleteAsync();
         }
 
@@ -71,7 +71,7 @@ namespace DermaKlinik.API.Application.Services
                 throw new KeyNotFoundException($"Menu with ID {id} not found.");
 
             menu.IsDeleted = true;
-            await _menuRepository.UpdateAsync(menu);
+            _menuRepository.Update(menu);
             await _unitOfWork.CompleteAsync();
         }
 
@@ -81,7 +81,7 @@ namespace DermaKlinik.API.Application.Services
             if (menu == null)
                 throw new KeyNotFoundException($"Menu with ID {id} not found.");
 
-            await _menuRepository.HardDeleteAsync(menu);
+            _menuRepository.HardDelete(menu);
             await _unitOfWork.CompleteAsync();
         }
     }

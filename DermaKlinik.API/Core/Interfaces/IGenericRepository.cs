@@ -9,9 +9,9 @@ namespace DermaKlinik.API.Core.Interfaces
         Task<IEnumerable<T>> GetAllAsync();
         Task<T?> GetByIdAsync(Guid id);
         Task<T> AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(T entity);
-        Task HardDeleteAsync(T entity);
+        void Update(T entity);
+        void Delete(T entity);
+        void HardDelete(T entity);
         Task<bool> ExistsAsync(Guid id);
     }
 } 

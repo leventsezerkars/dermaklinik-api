@@ -11,7 +11,7 @@ namespace DermaKlinik.API.Application.Services
     {
         Task<ApiResponse<string>> LoginAsync(LoginRequest request);
         Task<ApiResponse<User>> RegisterAsync(RegisterRequest request);
-        Task<ApiResponse<bool>> LogoutAsync();
+        ApiResponse<bool> Logout();
     }
 
     public class AuthService : IAuthService
@@ -43,7 +43,7 @@ namespace DermaKlinik.API.Application.Services
                 return ApiResponse<string>.ErrorResult("Geçersiz e-posta veya şifre", 401);
 
             user.LastLoginAt = DateTime.UtcNow;
-            await _userRepository.UpdateAsync(user);
+            _userRepository.Update(user);
 
             var token = _jwtService.GenerateToken(user);
             return ApiResponse<string>.SuccessResult(token, "Giriş başarılı");
@@ -72,7 +72,7 @@ namespace DermaKlinik.API.Application.Services
             return ApiResponse<User>.SuccessResult(user, "Kayıt başarılı", 201);
         }
 
-        public async Task<ApiResponse<bool>> LogoutAsync()
+        public ApiResponse<bool> Logout()
         {
             // JWT token'ları stateless olduğu için sunucu tarafında bir işlem yapmamıza gerek yok
             // Client tarafında token'ı silmek yeterli
