@@ -30,22 +30,43 @@ namespace DermaKlinik.API.Application.Features.Menus.Commands
 
         public async Task<ApiResponse<Menu>> Handle(UpdateMenuCommand request, CancellationToken cancellationToken)
         {
-            var menu = new Menu
+            try
             {
-                Id = request.Id,
-                Name = request.Name,
-                Description = request.Description,
-                Icon = request.Icon,
-                Url = request.Url,
-                ParentId = request.ParentId,
-                Order = request.Order,
-                IsActive = request.IsActive,
-                IsVisible = request.IsVisible,
-                RequiredPermission = request.RequiredPermission
-            };
+                var existingMenu = await _menuService.GetMenuByIdAsync(request.Id);
+                if (existingMenu == null)
+                    return ApiResponse<Menu>.ErrorResult($"Menü bulunamadı: ID {request.Id}", 404);
 
-            await _menuService.UpdateMenuAsync(menu);
-            return ApiResponse<Menu>.SuccessResult(menu, "Menü başarıyla güncellendi.");
+                if (request.ParentId.HasValue)
+                {
+                    var parentMenu = await _menuService.GetMenuByIdAsync(request.ParentId.Value);
+                    if (parentMenu == null)
+                        return ApiResponse<Menu>.ErrorResult("Belirtilen üst menü bulunamadı.", 404);
+
+                    if (request.ParentId.Value == request.Id)
+                        return ApiResponse<Menu>.ErrorResult("Bir menü kendisini üst menü olarak seçemez.");
+                }
+
+                var menu = new Menu
+                {
+                    Id = request.Id,
+                    Name = request.Name,
+                    Description = request.Description,
+                    Icon = request.Icon,
+                    Url = request.Url,
+                    ParentId = request.ParentId,
+                    Order = request.Order,
+                    IsActive = request.IsActive,
+                    IsVisible = request.IsVisible,
+                    RequiredPermission = request.RequiredPermission
+                };
+
+                await _menuService.UpdateMenuAsync(menu);
+                return ApiResponse<Menu>.SuccessResult(menu, "Menü başarıyla güncellendi.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<Menu>.ErrorResult($"Menü güncellenirken bir hata oluştu: {ex.Message}");
+            }
         }
     }
 } 

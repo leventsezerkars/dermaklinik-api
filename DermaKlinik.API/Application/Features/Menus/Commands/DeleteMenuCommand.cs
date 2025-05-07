@@ -20,8 +20,23 @@ namespace DermaKlinik.API.Application.Features.Menus.Commands
 
         public async Task<ApiResponse<bool>> Handle(DeleteMenuCommand request, CancellationToken cancellationToken)
         {
-            await _menuService.DeleteMenuAsync(request.Id);
-            return ApiResponse<bool>.SuccessResult(true, "Menü başarıyla silindi.");
+            try
+            {
+                var menu = await _menuService.GetMenuByIdAsync(request.Id);
+                if (menu == null)
+                    return ApiResponse<bool>.ErrorResult($"Menü bulunamadı: ID {request.Id}", 404);
+
+                var hasChildren = await _menuService.HasChildMenusAsync(request.Id);
+                if (hasChildren)
+                    return ApiResponse<bool>.ErrorResult("Bu menünün alt menüleri var. Önce alt menüleri silmelisiniz.");
+
+                await _menuService.DeleteMenuAsync(request.Id);
+                return ApiResponse<bool>.SuccessResult(true, "Menü başarıyla silindi.");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<bool>.ErrorResult($"Menü silinirken bir hata oluştu: {ex.Message}");
+            }
         }
     }
 } 

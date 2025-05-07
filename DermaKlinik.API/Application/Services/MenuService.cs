@@ -84,5 +84,10 @@ namespace DermaKlinik.API.Application.Services
             _menuRepository.HardDelete(menu);
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<bool> HasChildMenusAsync(Guid parentId)
+        {
+            return await _menuRepository.GetAll().AnyAsync(m => m.ParentId == parentId && !m.IsDeleted);
+        }
     }
 } 

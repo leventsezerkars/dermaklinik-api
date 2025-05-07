@@ -1,10 +1,12 @@
 using FluentValidation;
 using MediatR;
+using DermaKlinik.API.Core.Models;
 
 namespace DermaKlinik.API.Application.Common.Behaviors
 {
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
+        where TResponse : ApiResponse<object>
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -28,7 +30,11 @@ namespace DermaKlinik.API.Application.Common.Behaviors
                     .ToList();
 
                 if (failures.Count != 0)
-                    throw new ValidationException(failures);
+                {
+                    var errorMessages = failures.Select(x => x.ErrorMessage).ToList();
+                    var response = (TResponse)ApiResponse<object>.ErrorResult(errorMessages);
+                    return response;
+                }
             }
 
             return await next();

@@ -27,66 +27,68 @@ namespace DermaKlinik.API.Presentation.Controllers
         {
             var query = new GetAllPatientsQuery();
             var response = await _mediator.Send(query);
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
 
         // GET: api/Patients/active
         [HttpGet("active")]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetActivePatients()
+        public async Task<ActionResult<ApiResponse<IEnumerable<Patient>>>> GetActivePatients()
         {
-            var patients = await _mediator.Send(new GetActivePatientsQuery());
-            return Ok(patients);
+            var query = new GetActivePatientsQuery();
+            var response = await _mediator.Send(query);
+            return StatusCode(response.StatusCode, response);
         }
 
         // GET: api/Patients/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<Patient>>> GetPatient(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest(ApiResponse<Patient>.ErrorResult("Geçersiz ID"));
+
             var query = new GetPatientByIdQuery(id);
             var response = await _mediator.Send(query);
-
-            if (!response.Success)
-                return StatusCode(response.StatusCode, response);
-
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
 
         // POST: api/Patients
         [HttpPost]
         public async Task<ActionResult<ApiResponse<Patient>>> CreatePatient(CreatePatientCommand command)
         {
+            if (command == null)
+                return BadRequest(ApiResponse<Patient>.ErrorResult("Geçersiz istek"));
+
             var response = await _mediator.Send(command);
-
-            if (!response.Success)
-                return StatusCode(response.StatusCode, response);
-
-            return StatusCode(201, response);
+            return StatusCode(response.StatusCode, response);
         }
 
         // PUT: api/Patients/5
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<Patient>>> Update(Guid id, UpdatePatientCommand command)
         {
+            if (id == Guid.Empty)
+                return BadRequest(ApiResponse<Patient>.ErrorResult("Geçersiz ID"));
+
+            if (command == null)
+                return BadRequest(ApiResponse<Patient>.ErrorResult("Geçersiz istek"));
+
             if (id != command.Id)
-            {
                 return BadRequest(ApiResponse<Patient>.ErrorResult("ID uyuşmazlığı"));
-            }
 
             var response = await _mediator.Send(command);
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
 
         // DELETE: api/Patients/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeletePatient(Guid id)
         {
+            if (id == Guid.Empty)
+                return BadRequest(ApiResponse<bool>.ErrorResult("Geçersiz ID"));
+
             var command = new DeletePatientCommand(id);
             var response = await _mediator.Send(command);
-
-            if (!response.Success)
-                return StatusCode(response.StatusCode, response);
-
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
     }
 } 

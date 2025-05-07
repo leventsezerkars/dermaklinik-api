@@ -20,6 +20,9 @@ namespace DermaKlinik.API.Presentation.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<ApiResponse<string>>> Login(LoginRequest request)
         {
+            if (request == null)
+                return BadRequest(ApiResponse<string>.ErrorResult("Geçersiz istek"));
+
             var response = await _authService.LoginAsync(request);
             return StatusCode(response.StatusCode, response);
         }
@@ -27,6 +30,9 @@ namespace DermaKlinik.API.Presentation.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<User>>> Register(RegisterRequest request)
         {
+            if (request == null)
+                return BadRequest(ApiResponse<User>.ErrorResult("Geçersiz istek"));
+
             var response = await _authService.RegisterAsync(request);
             return StatusCode(response.StatusCode, response);
         }
@@ -35,7 +41,7 @@ namespace DermaKlinik.API.Presentation.Controllers
         public ActionResult<ApiResponse<bool>> Logout()
         {
             var response = _authService.Logout();
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
     }
 } 

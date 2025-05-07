@@ -13,6 +13,7 @@ namespace DermaKlinik.API.Infrastructure.Data
         public DbSet<Patient> Patients { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Menu> Menus { get; set; }
+        public DbSet<Log> Logs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -19,6 +19,7 @@ using FluentValidation;
 using DermaKlinik.API.Application.Common.Behaviors;
 using DermaKlinik.API.Infrastructure.UnitOfWork;
 using MediatR;
+using DermaKlinik.API.Presentation.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +77,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<ILogRepository, LogRepository>();
+builder.Services.AddScoped<ILogService, LogService>();
 
 // MediatR Configuration
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
@@ -138,6 +141,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Global Exception Middleware
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseCors("AllowAll");
 

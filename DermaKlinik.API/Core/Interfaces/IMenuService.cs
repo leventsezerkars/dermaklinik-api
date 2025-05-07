@@ -15,5 +15,6 @@ namespace DermaKlinik.API.Core.Interfaces
         Task UpdateMenuAsync(Menu menu);
         Task DeleteMenuAsync(Guid id);
         Task HardDeleteMenuAsync(Guid id);
+        Task<bool> HasChildMenusAsync(Guid parentId);
     }
 } 

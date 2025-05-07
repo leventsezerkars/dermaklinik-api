@@ -29,21 +29,35 @@ namespace DermaKlinik.API.Application.Features.Menus.Commands
 
         public async Task<ApiResponse<Menu>> Handle(CreateMenuCommand request, CancellationToken cancellationToken)
         {
-            var menu = new Menu
+            try
             {
-                Name = request.Name,
-                Description = request.Description,
-                Icon = request.Icon,
-                Url = request.Url,
-                ParentId = request.ParentId,
-                Order = request.Order,
-                IsActive = request.IsActive,
-                IsVisible = request.IsVisible,
-                RequiredPermission = request.RequiredPermission
-            };
+                if (request.ParentId.HasValue)
+                {
+                    var parentMenu = await _menuService.GetMenuByIdAsync(request.ParentId.Value);
+                    if (parentMenu == null)
+                        return ApiResponse<Menu>.ErrorResult("Belirtilen üst menü bulunamadı.", 404);
+                }
 
-            var result = await _menuService.CreateMenuAsync(menu);
-            return ApiResponse<Menu>.SuccessResult(result, "Menü başarıyla oluşturuldu.");
+                var menu = new Menu
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    Icon = request.Icon,
+                    Url = request.Url,
+                    ParentId = request.ParentId,
+                    Order = request.Order,
+                    IsActive = request.IsActive,
+                    IsVisible = request.IsVisible,
+                    RequiredPermission = request.RequiredPermission
+                };
+
+                var result = await _menuService.CreateMenuAsync(menu);
+                return ApiResponse<Menu>.SuccessResult(result, "Menü başarıyla oluşturuldu.", 201);
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<Menu>.ErrorResult($"Menü oluşturulurken bir hata oluştu: {ex.Message}");
+            }
         }
     }
 } 
