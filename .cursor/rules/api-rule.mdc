@@ -1,0 +1,221 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Tanıtım Sitesi Admin Paneli Veritabanı Tasarımı
+
+## Proje Hakkında
+
+Bu proje, bir tanıtım web sitesi için yönetim paneli (admin panel) veri yapısını kapsamaktadır. 
+Amaç, menü yönetimi, çoklu dil desteği, blog yönetimi, galeri yönetimi ve şirket bilgilerini yönetmek için 
+esnek ve genişletilebilir bir veritabanı yapısı oluşturmaktır. 
+
+Veritabanı tasarımında GUID anahtarlar kullanılmış, çoklu dil desteği için çeviri tabloları oluşturulmuş 
+ve SEO ile yönetilebilirlik göz önünde bulundurulmuştur.
+
+---
+
+## Tablolar ve Açıklamaları
+
+---
+
+### 1. Language (Dil Yönetimi)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Code | NVARCHAR(10) PRIMARY KEY | Dil kodu (örnek: 'tr', 'en') |
+| Name | NVARCHAR(50) | Dil adı (örnek: 'Türkçe', 'English') |
+| IsDefault | BIT | Sistem varsayılan dili |
+| IsActive | BIT | Dilin aktif/pasif durumu |
+
+**Amaç:** Çoklu dil desteği için sistemde kullanılan dilleri yönetmek.
+
+---
+
+### 2. User (Admin Kullanıcıları)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Kullanıcı ID'si (GUID) |
+| Username | NVARCHAR(100) | Kullanıcı adı |
+| PasswordHash | NVARCHAR(255) | Şifre hash'i |
+| Email | NVARCHAR(255) | E-posta adresi |
+| IsActive | BIT | Kullanıcı aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+**Amaç:** Admin paneline giriş yapan kullanıcıların bilgilerini tutmak.
+
+---
+
+### 3. Menu (Menü Yapısı)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Menü ID'si |
+| ParentId | UNIQUEIDENTIFIER NULL | Üst menü ID'si (kendine referans) |
+| Slug | NVARCHAR(255) | Menü URL'si için benzersiz slug |
+| SortOrder | INT | Menü sıralaması |
+| IsActive | BIT | Menü aktiflik durumu |
+| IsDeletable | BIT | Silinebilirlik durumu (false ise silinemez) |
+| Type | INT | Menü tipi (0=Sayfa,1=Link,2=İçerik,3=Anchor) |
+| Target | NVARCHAR(20) | Link hedefi (_self, _blank vb.) |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+**Amaç:** Menü ve alt menülerin yapısını yönetmek. Çok katmanlı menü desteği sağlar.
+
+---
+
+### 4. MenuTranslation (Menü İçeriklerinin Çoklu Dili)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Çeviri kaydı ID'si |
+| MenuId | UNIQUEIDENTIFIER | Menu tablosuna referans |
+| LanguageCode | NVARCHAR(10) | Language tablosuna referans |
+| Title | NVARCHAR(255) | Menü başlığı |
+| Content | NVARCHAR(MAX) | Menü içeriği (opsiyonel) |
+| Slug | NVARCHAR(255) | Dil bazlı URL slug (opsiyonel) |
+| SeoTitle | NVARCHAR(255) | SEO başlığı |
+| SeoDescription | NVARCHAR(500) | SEO açıklaması |
+| SeoKeywords | NVARCHAR(500) | SEO anahtar kelimeleri |
+| IsActive | BIT | Çeviri aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+**Amaç:** Menülerin farklı dillerdeki başlık ve içeriklerini tutmak.
+
+---
+
+### 5. CompanyInfo (Şirket Bilgileri)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Şirket kaydı ID'si |
+| LogoUrl | NVARCHAR(500) | Logo resmi URL'si |
+| Name | NVARCHAR(255) | Şirket adı |
+| Address | NVARCHAR(500) | Adres |
+| Phone | NVARCHAR(100) | Telefon numarası |
+| Email | NVARCHAR(255) | E-posta adresi |
+| Facebook | NVARCHAR(255) | Facebook sayfası URL'si |
+| Twitter | NVARCHAR(255) | Twitter sayfası URL'si |
+| Instagram | NVARCHAR(255) | Instagram sayfası URL'si |
+| LinkedIn | NVARCHAR(255) | LinkedIn sayfası URL'si |
+| GoogleMapsUrl | NVARCHAR(1000) | Google Maps konum linki |
+| GoogleAnalyticsCode | NVARCHAR(1000) | Google Analytics izleme kodu |
+| IsActive | BIT | Aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+**Amaç:** Site üzerindeki şirket bilgilerini tutmak.
+
+---
+
+### 6. BlogCategory (Blog Kategorileri)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Kategori ID'si |
+| IsActive | BIT | Aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+---
+
+### 7. BlogCategoryTranslation (Kategori Çevirileri)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Çeviri ID'si |
+| CategoryId | UNIQUEIDENTIFIER | BlogCategory referansı |
+| LanguageCode | NVARCHAR(10) | Language referansı |
+| Name | NVARCHAR(255) | Kategori adı |
+
+---
+
+### 8. Blog (Blog Yazıları)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Blog ID'si |
+| CategoryId | UNIQUEIDENTIFIER | BlogCategory referansı |
+| CreatedAt | DATETIME | Oluşturulma tarihi |
+| ViewCount | INT | Görüntülenme sayısı |
+| IsActive | BIT | Aktiflik durumu |
+| CreatedBy | UNIQUEIDENTIFIER | Oluşturan kullanıcı ID'si |
+| UpdatedBy | UNIQUEIDENTIFIER | Güncelleyen kullanıcı ID'si |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+---
+
+### 9. BlogTranslation (Blog Yazısı İçerik Çevirileri)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Çeviri ID'si |
+| BlogId | UNIQUEIDENTIFIER | Blog referansı |
+| LanguageCode | NVARCHAR(10) | Dil kodu |
+| Title | NVARCHAR(255) | Başlık |
+| Content | NVARCHAR(MAX) | İçerik |
+| Slug | NVARCHAR(255) | Dil bazlı slug (URL) |
+| SeoTitle | NVARCHAR(255) | SEO başlığı |
+| SeoDescription | NVARCHAR(500) | SEO açıklaması |
+| SeoKeywords | NVARCHAR(500) | SEO anahtar kelimeleri |
+| IsActive | BIT | Aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+---
+
+### 10. GalleryImage (Galeri Resimleri)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Resim ID'si |
+| ImageUrl | NVARCHAR(500) | Resim URL'si |
+| Title | NVARCHAR(255) | Başlık |
+| AltText | NVARCHAR(255) | Alt metin |
+| Caption | NVARCHAR(255) | Resim açıklaması |
+| IsActive | BIT | Aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+---
+
+### 11. GalleryGroup (Galeri Grupları)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | Grup ID'si |
+| Name | NVARCHAR(255) | Grup adı |
+| IsActive | BIT | Aktiflik durumu |
+| CreatedAt | DATETIME | Oluşturulma zamanı |
+| UpdatedAt | DATETIME | Güncellenme zamanı |
+
+---
+
+### 12. GalleryImageGroupMap (Resim - Grup İlişkisi)
+
+| Alan | Tip | Açıklama |
+|-------|-----|----------|
+| Id | UNIQUEIDENTIFIER PRIMARY KEY | ID |
+| ImageId | UNIQUEIDENTIFIER | GalleryImage referansı |
+| GroupId | UNIQUEIDENTIFIER | GalleryGroup referansı |
+
+---
+
+## Genel Notlar
+
+- Tüm anahtarlar `GUID` formatındadır.
+- Çoklu dil desteği için `Language` tablosu ve çeviri tabloları kullanılmıştır.
+- Menüde `Slug` alanı link için tekil ve SEO dostu yapı sağlar.
+- `CreatedAt` ve `UpdatedAt` alanları her tabloda bulunarak değişiklik takibi sağlanmıştır.
+- `IsActive` ve `IsDeletable` alanları içerik yönetimini kolaylaştırır.
+- SEO alanları (Title, Description, Keywords) içeriklerin arama motorları için optimize edilmesini sağlar.
+
+---
+
+## İhtiyaç halinde örnek test verileri ve API tasarımı desteği sağlanabilir.
+

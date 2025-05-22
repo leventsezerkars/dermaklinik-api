@@ -5,32 +5,43 @@ using DermaKlinik.API.Infrastructure.Data;
 using DermaKlinik.API.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;
 using DermaKlinik.API.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DermaKlinik.API.Infrastructure.UnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
     {
-        private readonly ApplicationDbContext _context;
+        private readonly TContext _context;
         private IDbContextTransaction? _transaction;
-        private IPatientRepository _patients;
-        private IUserRepository _users;
         private bool _disposed;
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(TContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-
-        public IPatientRepository Patients => _patients ??= new PatientRepository(_context);
-        public IUserRepository Users => _users ??= new UserRepository(_context);
 
         public async Task<int> CompleteAsync()
         {
-            return await _context.SaveChangesAsync();
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new Exception("Veri güncellenirken eşzamanlılık hatası oluştu.", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Veritabanı güncelleme hatası oluştu.", ex);
+            }
         }
 
         public async Task BeginTransactionAsync()
         {
+            if (_transaction != null)
+            {
+                throw new InvalidOperationException("Zaten aktif bir transaction bulunmaktadır.");
+            }
             _transaction = await _context.Database.BeginTransactionAsync();
         }
 
@@ -38,11 +49,13 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
         {
             try
             {
-                await _context.SaveChangesAsync();
-                if (_transaction != null)
+                if (_transaction == null)
                 {
-                    await _transaction.CommitAsync();
+                    throw new InvalidOperationException("Aktif bir transaction bulunmamaktadır.");
                 }
+
+                await _context.SaveChangesAsync();
+                await _transaction.CommitAsync();
             }
             catch
             {
@@ -61,12 +74,14 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
 
         public async Task RollbackTransactionAsync()
         {
-            if (_transaction != null)
+            if (_transaction == null)
             {
-                await _transaction.RollbackAsync();
-                _transaction.Dispose();
-                _transaction = null;
+                throw new InvalidOperationException("Aktif bir transaction bulunmamaktadır.");
             }
+
+            await _transaction.RollbackAsync();
+            _transaction.Dispose();
+            _transaction = null;
         }
 
         public void Dispose()
