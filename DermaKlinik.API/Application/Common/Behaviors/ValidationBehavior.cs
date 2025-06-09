@@ -1,12 +1,12 @@
+using DermaKlinik.API.Core.Models;
 using FluentValidation;
 using MediatR;
-using DermaKlinik.API.Core.Models;
 
 namespace DermaKlinik.API.Application.Common.Behaviors
 {
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
-        where TResponse : ApiResponse<object>
+        where TResponse : ApiResponse
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -32,7 +32,7 @@ namespace DermaKlinik.API.Application.Common.Behaviors
                 if (failures.Count != 0)
                 {
                     var errorMessages = failures.Select(x => x.ErrorMessage).ToList();
-                    var response = (TResponse)ApiResponse<object>.ErrorResult(errorMessages);
+                    var response = (TResponse)ApiResponse.ErrorResult(data: errorMessages);
                     return response;
                 }
             }
@@ -40,4 +40,4 @@ namespace DermaKlinik.API.Application.Common.Behaviors
             return await next();
         }
     }
-} 
+}

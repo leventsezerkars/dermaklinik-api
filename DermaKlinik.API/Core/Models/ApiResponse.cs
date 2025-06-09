@@ -1,44 +1,75 @@
+using Newtonsoft.Json;
+using System.Net;
+
 namespace DermaKlinik.API.Core.Models
 {
-    public class ApiResponse<T>
+    public class ApiResponse
     {
-        public bool Success { get; set; }
+        public bool Result { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string? Message { get; set; }
-        public T? Data { get; set; }
-        public List<string>? Errors { get; set; }
-        public int StatusCode { get; set; }
+        public string? ErrorMessage { get; set; }
+        public HttpStatusCode StatusCode { get; set; }
 
-        public static ApiResponse<T> SuccessResult(T data, string? message = null, int statusCode = 200)
+        [JsonProperty]
+        public object Data { get; set; }
+        public int TotalCount { get; set; }
+        public bool HasNext { get; set; }
+        public static ApiResponse SuccessResult(object data = null, string message = "İşlem başarılı", HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            return new ApiResponse<T>
+            return new ApiResponse
             {
-                Success = true,
+                Result = true,
                 Message = message,
-                Data = data,
-                StatusCode = statusCode
+                StatusCode = statusCode,
+                Data = data
             };
         }
 
-        public static ApiResponse<T> ErrorResult(string error, int statusCode = 400)
+        public static ApiResponse ErrorResult(string message = "İşlem başarısız", HttpStatusCode statusCode = HttpStatusCode.BadRequest, object data = null)
         {
-            return new ApiResponse<T>
+            return new ApiResponse
             {
-                Success = false,
-                Message = error,
-                Errors = new List<string> { error },
-                StatusCode = statusCode
-            };
-        }
-
-        public static ApiResponse<T> ErrorResult(List<string> errors, int statusCode = 400)
-        {
-            return new ApiResponse<T>
-            {
-                Success = false,
-                Message = "İşlem başarısız",
-                Errors = errors,
-                StatusCode = statusCode
+                Result = false,
+                ErrorMessage = message,
+                StatusCode = statusCode,
+                Data = data
             };
         }
     }
-} 
+
+    public class ApiResponse<T>
+    {
+        public bool Result { get; set; }
+        public string Message { get; set; }
+        public string? ErrorMessage { get; set; }
+
+        public HttpStatusCode StatusCode { get; set; }
+
+        [JsonProperty]
+        public T Data { get; set; }
+        public int TotalCount { get; set; }
+        public bool HasNext { get; set; }
+        public static ApiResponse<T> SuccessResult(T data, string message = "İşlem başarılı", HttpStatusCode statusCode = HttpStatusCode.OK)
+        {
+            return new ApiResponse<T>
+            {
+                Result = true,
+                Message = message,
+                StatusCode = statusCode,
+                Data = data
+            };
+        }
+
+        public static ApiResponse<T> ErrorResult(string message = "İşlem başarısız", HttpStatusCode statusCode = HttpStatusCode.BadRequest, T data = default)
+        {
+            return new ApiResponse<T>
+            {
+                Result = false,
+                ErrorMessage = message,
+                StatusCode = statusCode,
+                Data = data
+            };
+        }
+    }
+}

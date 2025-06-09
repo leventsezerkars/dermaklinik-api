@@ -1,7 +1,6 @@
-using DermaKlinik.API.Core.Models;
-using DermaKlinik.API.Application.Features.Menus.Commands;
-using DermaKlinik.API.Application.Features.Menus.Queries;
-using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Application.DTOs.Menu;
+using DermaKlinik.API.Application.Features.Menu.Commands;
+using DermaKlinik.API.Application.Features.Menu.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,6 @@ namespace DermaKlinik.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
     public class MenuController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -21,93 +19,49 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<PaginatedList<Menu>>>> GetAll([FromQuery] PagingParams pagingParams)
+        public async Task<ActionResult<List<MenuDto>>> GetAll()
         {
-            if (pagingParams == null)
-                return BadRequest(ApiResponse<PaginatedList<Menu>>.ErrorResult("Geçersiz sayfalama parametreleri"));
-
-            var query = new GetAllMenusQuery 
-            { 
-                PageNumber = pagingParams.PageNumber, 
-                PageSize = pagingParams.PageSize 
-            };
+            var query = new GetAllMenusQuery();
             var result = await _mediator.Send(query);
-            return StatusCode(result.StatusCode, result);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<Menu>>> GetById(Guid id)
+        public async Task<ActionResult<MenuDto>> GetById(Guid id)
         {
-            if (id == Guid.Empty)
-                return BadRequest(ApiResponse<Menu>.ErrorResult("Geçersiz ID"));
-
             var query = new GetMenuByIdQuery { Id = id };
             var result = await _mediator.Send(query);
-            return StatusCode(result.StatusCode, result);
-        }
-
-        [HttpGet("root")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Menu>>>> GetRootMenus()
-        {
-            var query = new GetRootMenusQuery();
-            var result = await _mediator.Send(query);
-            return StatusCode(result.StatusCode, result);
-        }
-
-        [HttpGet("active")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Menu>>>> GetActiveMenus()
-        {
-            var query = new GetActiveMenusQuery();
-            var result = await _mediator.Send(query);
-            return StatusCode(result.StatusCode, result);
-        }
-
-        [HttpGet("permission/{permission}")]
-        public async Task<ActionResult<ApiResponse<IEnumerable<Menu>>>> GetMenusByPermission(string permission)
-        {
-            if (string.IsNullOrEmpty(permission))
-                return BadRequest(ApiResponse<IEnumerable<Menu>>.ErrorResult("Geçersiz yetki parametresi"));
-
-            var query = new GetMenusByPermissionQuery { Permission = permission };
-            var result = await _mediator.Send(query);
-            return StatusCode(result.StatusCode, result);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<Menu>>> Create(CreateMenuCommand command)
+        [Authorize]
+        public async Task<ActionResult<MenuDto>> Create([FromBody] CreateMenuDto createMenuDto)
         {
-            if (command == null)
-                return BadRequest(ApiResponse<Menu>.ErrorResult("Geçersiz istek"));
-
+            var command = new CreateMenuCommand { CreateMenuDto = createMenuDto };
             var result = await _mediator.Send(command);
-            return StatusCode(result.StatusCode, result);
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<Menu>>> Update(Guid id, UpdateMenuCommand command)
+        [Authorize]
+        public async Task<ActionResult<MenuDto>> Update(Guid id, [FromBody] UpdateMenuDto updateMenuDto)
         {
-            if (id == Guid.Empty)
-                return BadRequest(ApiResponse<Menu>.ErrorResult("Geçersiz ID"));
+            if (id != updateMenuDto.Id)
+                return BadRequest();
 
-            if (command == null)
-                return BadRequest(ApiResponse<Menu>.ErrorResult("Geçersiz istek"));
-
-            if (id != command.Id)
-                return BadRequest(ApiResponse<Menu>.ErrorResult("ID'ler eşleşmiyor."));
-
+            var command = new UpdateMenuCommand { UpdateMenuDto = updateMenuDto };
             var result = await _mediator.Send(command);
-            return StatusCode(result.StatusCode, result);
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse<bool>>> Delete(Guid id)
+        [Authorize]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            if (id == Guid.Empty)
-                return BadRequest(ApiResponse<bool>.ErrorResult("Geçersiz ID"));
-
             var command = new DeleteMenuCommand { Id = id };
-            var result = await _mediator.Send(command);
-            return StatusCode(result.StatusCode, result);
+            await _mediator.Send(command);
+            return NoContent();
         }
     }
-} 
+}

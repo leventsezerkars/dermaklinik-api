@@ -11,4 +11,4 @@ namespace DermaKlinik.API.Core.Models.Auth
         [Required]
         public string Password { get; set; } = null!;
     }
-} 
+}

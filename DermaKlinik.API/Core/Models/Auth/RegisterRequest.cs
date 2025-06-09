@@ -25,4 +25,4 @@ namespace DermaKlinik.API.Core.Models.Auth
         [Compare("Password")]
         public string ConfirmPassword { get; set; } = null!;
     }
-} 
+}

@@ -7,4 +7,4 @@ namespace DermaKlinik.API.Core.Entities
         [Key]
         public Guid Id { get; set; }
     }
-} 
+}

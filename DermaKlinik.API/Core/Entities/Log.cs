@@ -1,8 +1,6 @@
-using System;
-
 namespace DermaKlinik.API.Core.Entities
 {
-    public class Log : BaseEntity
+    public class Log : AuditableEntity
     {
         public string Level { get; set; }
         public string Message { get; set; }
@@ -20,4 +18,4 @@ namespace DermaKlinik.API.Core.Entities
         public DateTime Timestamp { get; set; }
         public string? AdditionalData { get; set; }
     }
-} 
+}

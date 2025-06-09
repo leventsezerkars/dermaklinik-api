@@ -129,7 +129,7 @@ ve SEO ile yönetilebilirlik göz önünde bulundurulmuştur.
 | Alan | Tip | Açıklama |
 |-------|-----|----------|
 | Id | UNIQUEIDENTIFIER PRIMARY KEY | Çeviri ID'si |
-| CategoryId | UNIQUEIDENTIFIER | BlogCategory referansı |
+| BlogCategoryId | UNIQUEIDENTIFIER | BlogCategory referansı |
 | LanguageCode | NVARCHAR(10) | Language referansı |
 | Name | NVARCHAR(255) | Kategori adı |
 

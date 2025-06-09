@@ -1,82 +1,95 @@
-using System.Security.Claims;
-using DermaKlinik.API.Core.Entities;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Core.Models;
-using DermaKlinik.API.Core.Models.Auth;
 using Microsoft.AspNetCore.Identity;
+using System.Net;
 
 namespace DermaKlinik.API.Application.Services
 {
+    public class LoginRequest
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+    }
+
+    public class RegisterRequest
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+    }
+
     public interface IAuthService
     {
         Task<ApiResponse<string>> LoginAsync(LoginRequest request);
-        Task<ApiResponse<User>> RegisterAsync(RegisterRequest request);
-        ApiResponse<bool> Logout();
+        object Logout();
+        Task<ApiResponse<Core.Entities.User>> RegisterAsync(RegisterRequest request);
     }
 
     public class AuthService : IAuthService
     {
-        private readonly IGenericRepository<User> _userRepository;
+        private readonly IGenericRepository<Core.Entities.User> _userRepository;
+        private readonly IPasswordHasher<Core.Entities.User> _passwordHasher;
         private readonly IJwtService _jwtService;
-        private readonly IPasswordHasher<User> _passwordHasher;
 
         public AuthService(
-            IGenericRepository<User> userRepository,
-            IJwtService jwtService,
-            IPasswordHasher<User> passwordHasher)
+            IGenericRepository<Core.Entities.User> userRepository,
+            IPasswordHasher<Core.Entities.User> passwordHasher,
+            IJwtService jwtService)
         {
             _userRepository = userRepository;
-            _jwtService = jwtService;
             _passwordHasher = passwordHasher;
+            _jwtService = jwtService;
         }
 
         public async Task<ApiResponse<string>> LoginAsync(LoginRequest request)
         {
-            var user = (await _userRepository.GetAllAsync())
-                .FirstOrDefault(u => u.Email == request.Email && u.IsActive);
+            var user = (_userRepository.GetAll())
+                .FirstOrDefault(u => u.Email == request.Email);
 
             if (user == null)
-                return ApiResponse<string>.ErrorResult("Geçersiz e-posta veya şifre", 401);
+            {
+                return ApiResponse<string>.ErrorResult("Kullanıcı bulunamadı");
+            }
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
             if (result != PasswordVerificationResult.Success)
-                return ApiResponse<string>.ErrorResult("Geçersiz e-posta veya şifre", 401);
-
-            user.LastLoginAt = DateTime.UtcNow;
-            _userRepository.Update(user);
+            {
+                return ApiResponse<string>.ErrorResult("Geçersiz şifre");
+            }
 
             var token = _jwtService.GenerateToken(user);
-            return ApiResponse<string>.SuccessResult(token, "Giriş başarılı");
+            return ApiResponse<string>.SuccessResult(token);
         }
 
-        public async Task<ApiResponse<User>> RegisterAsync(RegisterRequest request)
+        public object Logout()
         {
-            var existingUser = (await _userRepository.GetAllAsync())
+            throw new NotImplementedException();
+        }
+
+        public async Task<ApiResponse<Core.Entities.User>> RegisterAsync(RegisterRequest request)
+        {
+            var existingUser = (_userRepository.GetAll())
                 .FirstOrDefault(u => u.Email == request.Email);
 
             if (existingUser != null)
-                return ApiResponse<User>.ErrorResult("Bu e-posta adresi zaten kullanılıyor");
-
-            var user = new User
             {
+                return ApiResponse<Core.Entities.User>.ErrorResult("Bu e-posta adresi zaten kullanılıyor");
+            }
+
+            var user = new Core.Entities.User
+            {
+                Email = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                Email = request.Email,
                 Role = "User",
-                IsActive = true
+                CreatedAt = DateTime.UtcNow
             };
 
             user.PasswordHash = _passwordHasher.HashPassword(user, request.Password);
             await _userRepository.AddAsync(user);
 
-            return ApiResponse<User>.SuccessResult(user, "Kayıt başarılı", 201);
-        }
-
-        public ApiResponse<bool> Logout()
-        {
-            // JWT token'ları stateless olduğu için sunucu tarafında bir işlem yapmamıza gerek yok
-            // Client tarafında token'ı silmek yeterli
-            return ApiResponse<bool>.SuccessResult(true, "Çıkış başarılı");
+            return ApiResponse<Core.Entities.User>.SuccessResult(user, "Kayıt başarılı", HttpStatusCode.Created);
         }
     }
-} 
+}

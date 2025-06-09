@@ -1,39 +1,19 @@
-using System;
-using System.Threading.Tasks;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Infrastructure.Data;
-using DermaKlinik.API.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore.Storage;
-using DermaKlinik.API.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DermaKlinik.API.Infrastructure.UnitOfWork
 {
-    public class UnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
+    public class UnitOfWork : IUnitOfWork, IDisposable
     {
-        private readonly TContext _context;
+        private readonly ApplicationDbContext _context;
         private IDbContextTransaction? _transaction;
         private bool _disposed;
 
-        public UnitOfWork(TContext context)
+        public UnitOfWork(ApplicationDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
-        }
-
-        public async Task<int> CompleteAsync()
-        {
-            try
-            {
-                return await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                throw new Exception("Veri güncellenirken eşzamanlılık hatası oluştu.", ex);
-            }
-            catch (DbUpdateException ex)
-            {
-                throw new Exception("Veritabanı güncelleme hatası oluştu.", ex);
-            }
         }
 
         public async Task BeginTransactionAsync()
@@ -54,7 +34,7 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
                     throw new InvalidOperationException("Aktif bir transaction bulunmamaktadır.");
                 }
 
-                await _context.SaveChangesAsync();
+                await CompleteAsync();
                 await _transaction.CommitAsync();
             }
             catch
@@ -99,5 +79,21 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
             }
             _disposed = true;
         }
+
+        public async Task<int> CompleteAsync()
+        {
+            try
+            {
+                return await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                throw new Exception("Veri güncellenirken eşzamanlılık hatası oluştu.", ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                throw new Exception("Veritabanı güncelleme hatası oluştu.", ex);
+            }
+        }
     }
-} 
+}

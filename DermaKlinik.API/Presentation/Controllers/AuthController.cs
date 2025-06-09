@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using DermaKlinik.API.Core.Models.Auth;
 using DermaKlinik.API.Application.Services;
-using DermaKlinik.API.Core.Models;
 using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Core.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DermaKlinik.API.Presentation.Controllers
 {
@@ -24,7 +23,7 @@ namespace DermaKlinik.API.Presentation.Controllers
                 return BadRequest(ApiResponse<string>.ErrorResult("Geçersiz istek"));
 
             var response = await _authService.LoginAsync(request);
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
         [HttpPost("register")]
@@ -34,14 +33,14 @@ namespace DermaKlinik.API.Presentation.Controllers
                 return BadRequest(ApiResponse<User>.ErrorResult("Geçersiz istek"));
 
             var response = await _authService.RegisterAsync(request);
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
 
         [HttpPost("logout")]
         public ActionResult<ApiResponse<bool>> Logout()
         {
             var response = _authService.Logout();
-            return StatusCode(response.StatusCode, response);
+            return Ok(response);
         }
     }
-} 
+}
