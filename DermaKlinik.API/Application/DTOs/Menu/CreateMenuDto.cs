@@ -2,7 +2,7 @@ using DermaKlinik.API.Core.Entities;
 
 namespace DermaKlinik.API.Application.DTOs.Menu
 {
-    public class CreateMenuDto
+    public class CreateMenuDto : BaseDto
     {
         public Guid? ParentId { get; set; }
         public int SortOrder { get; set; }

@@ -24,6 +24,11 @@ namespace DermaKlinik.API.Application.Features.Menu.Commands
             try
             {
                 var result = await _menuService.CreateAsync(request.CreateMenuDto);
+                foreach (var item in request.CreateMenuDto.Translations)
+                {
+                    item.MenuId = result.Id;
+                    await _menuService.CreateTranslationAsync(item);
+                }
                 return ApiResponse<MenuDto>.SuccessResult(result);
             }
             catch (Exception ex)

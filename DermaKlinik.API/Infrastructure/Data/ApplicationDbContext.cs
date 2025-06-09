@@ -1,4 +1,5 @@
 using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Infrastructure.Data.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
@@ -6,9 +7,14 @@ namespace DermaKlinik.API.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            AuditableEntitySaveChangesInterceptor auditableEntitySaveChangesInterceptor)
             : base(options)
         {
+            _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
         }
 
         public DbSet<Menu> Menu { get; set; }
@@ -24,6 +30,12 @@ namespace DermaKlinik.API.Infrastructure.Data
         public DbSet<GalleryImageGroupMap> GalleryImageGroupMap { get; set; }
         public DbSet<Log> Log { get; set; }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.AddInterceptors(_auditableEntitySaveChangesInterceptor);
+            base.OnConfiguring(optionsBuilder);
+        }
+
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             base.ConfigureConventions(configurationBuilder);
@@ -36,6 +48,7 @@ namespace DermaKlinik.API.Infrastructure.Data
 
             configurationBuilder.Properties<string>().UseCollation("Latin1_General_CI_AI");
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

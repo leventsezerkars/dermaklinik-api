@@ -1,8 +1,11 @@
-﻿namespace DermaKlinik.API.Application.DTOs.Menu
+﻿using DermaKlinik.API.Core.Entities;
+
+namespace DermaKlinik.API.Application.DTOs.Menu
 {
-    public class CreateMenuTranslationDto
+    public class CreateMenuTranslationDto : BaseDto
     {
-        public string LanguageCode { get; set; }
+        public Guid MenuId { get; set; }
+        public Guid LanguageId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public string Slug { get; set; }

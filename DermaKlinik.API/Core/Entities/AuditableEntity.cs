@@ -19,4 +19,16 @@ namespace DermaKlinik.API.Core.Entities
         public bool IsActive { get; set; } = true;
         public bool IsDeleted { get; set; } = false;
     }
+    public abstract class AuditableDto : BaseDto
+    {
+        public DateTime CreatedAt { get; set; }
+        public Guid? CreatedById { get; set; }
+        public User Creator { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
+        public Guid? UpdatedById { get; set; }
+        public User Updater { get; set; }
+        
+
+    }
 }

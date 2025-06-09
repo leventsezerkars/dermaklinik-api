@@ -7,7 +7,6 @@ namespace DermaKlinik.API.Application.Features.Menu.Commands
 {
     public class UpdateMenuCommand : IRequest<ApiResponse<MenuDto>>
     {
-        public Guid Id { get; set; }
         public UpdateMenuDto UpdateMenuDto { get; set; }
     }
 
@@ -24,7 +23,16 @@ namespace DermaKlinik.API.Application.Features.Menu.Commands
         {
             try
             {
-                var result = await _menuService.UpdateAsync(request.Id, request.UpdateMenuDto);
+                if (request.UpdateMenuDto.Id == null)
+                    return ApiResponse<MenuDto>.ErrorResult("Id alanı null olamaz");
+
+                var result = await _menuService.UpdateAsync((Guid)request.UpdateMenuDto.Id, request.UpdateMenuDto);
+
+                foreach (var item in request.UpdateMenuDto.Translations)
+                {
+                    await _menuService.UpdateTranslationAsync((Guid)item.Id, item);
+                }
+
                 if (result == null)
                 {
                     return ApiResponse<MenuDto>.ErrorResult("Menü bulunamadı");

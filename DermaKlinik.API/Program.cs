@@ -22,6 +22,8 @@ using System.Text.Json.Serialization;
 using Log = Serilog.Log;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using DermaKlinik.API.Application.Services.Language;
+using DermaKlinik.API.Infrastructure.Data.Interceptors;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +43,7 @@ builder.Services.AddControllers()
     });
 
 // DbContext Configuration
+builder.Services.AddScoped<AuditableEntitySaveChangesInterceptor>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
     sqlServerOptionsAction: sqlOptions =>
@@ -108,6 +111,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<ILanguageService, LanguageService>();
 
 // MediatR Configuration
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
@@ -164,6 +168,8 @@ builder.Services.AddCors(options =>
                              .AllowCredentials();
             });
 });
+
+// Add services to the container.
 
 var app = builder.Build();
 

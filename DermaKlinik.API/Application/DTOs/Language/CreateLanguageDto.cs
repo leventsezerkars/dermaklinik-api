@@ -1,21 +1,17 @@
+using DermaKlinik.API.Core.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace DermaKlinik.API.Application.DTOs.Language
 {
-    public class CreateLanguageDto
+    public class CreateLanguageDto : BaseDto
     {
-        [Required]
-        [StringLength(50)]
+        [Required(ErrorMessage = "Dil adı zorunludur.")]
+        [StringLength(50, ErrorMessage = "Dil adı en fazla 50 karakter olabilir.")]
         public string Name { get; set; }
 
-        [Required]
-        [StringLength(10)]
+        [Required(ErrorMessage = "Dil kodu zorunludur.")]
+        [StringLength(10, ErrorMessage = "Dil kodu en fazla 10 karakter olabilir.")]
         public string Code { get; set; }
-
-        [StringLength(50)]
-        public string Flag { get; set; }
-
-        public bool IsActive { get; set; } = true;
 
         public bool IsDefault { get; set; }
     }

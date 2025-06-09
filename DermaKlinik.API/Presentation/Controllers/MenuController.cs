@@ -2,13 +2,14 @@ using DermaKlinik.API.Application.DTOs.Menu;
 using DermaKlinik.API.Application.Features.Menu.Commands;
 using DermaKlinik.API.Application.Features.Menu.Queries;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DermaKlinik.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    //[Authorize]
+
     public class MenuController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,7 +36,6 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<MenuDto>> Create([FromBody] CreateMenuDto createMenuDto)
         {
             var command = new CreateMenuCommand { CreateMenuDto = createMenuDto };
@@ -43,20 +43,15 @@ namespace DermaKlinik.API.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpPut("{id}")]
-        [Authorize]
-        public async Task<ActionResult<MenuDto>> Update(Guid id, [FromBody] UpdateMenuDto updateMenuDto)
+        [HttpPut]
+        public async Task<ActionResult<MenuDto>> Update([FromBody] UpdateMenuDto updateMenuDto)
         {
-            if (id != updateMenuDto.Id)
-                return BadRequest();
-
             var command = new UpdateMenuCommand { UpdateMenuDto = updateMenuDto };
             var result = await _mediator.Send(command);
             return Ok(result);
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> Delete(Guid id)
         {
             var command = new DeleteMenuCommand { Id = id };
