@@ -23,6 +23,9 @@ namespace DermaKlinik.API.Application.Features.Menu.Commands
         {
             try
             {
+                if (request.CreateMenuDto.Slug == null)
+                    request.CreateMenuDto.Slug = "";
+
                 var result = await _menuService.CreateAsync(request.CreateMenuDto);
                 foreach (var item in request.CreateMenuDto.Translations)
                 {

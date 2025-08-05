@@ -8,7 +8,7 @@ namespace DermaKlinik.API.Application.DTOs.Menu
         public int SortOrder { get; set; }
         public string Slug { get; set; }
         public bool IsDeletable { get; set; }
-        public MenuType Type { get; set; }
+        public int Type { get; set; }
         public string Target { get; set; }
         public List<MenuDto> Children { get; set; }
         public List<MenuTranslationDto> Translations { get; set; }

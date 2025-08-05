@@ -29,7 +29,9 @@ namespace DermaKlinik.API.Application.Mappings
                 .ForMember(dest => dest.Children, opt => opt.Ignore());
 
             // MenuTranslation Mappings
-            CreateMap<MenuTranslation, MenuTranslationDto>();
+            CreateMap<MenuTranslation, MenuTranslationDto>()
+                .ForMember(dest => dest.Language, opt => opt.MapFrom(src => src.Language));
+                
             CreateMap<CreateMenuTranslationDto, MenuTranslation>();
             CreateMap<UpdateMenuTranslationDto, MenuTranslation>();
 

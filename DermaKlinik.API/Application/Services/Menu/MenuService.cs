@@ -17,14 +17,15 @@ namespace DermaKlinik.API.Application.Services.Menu
     {
         public async Task<List<MenuDto>> GetAllAsync(PagingRequestModel request, MenuFilter filters)
         {
-            var menus = menuTranslationRepository.Query()
-                .Include(m => m.Menu)
+            var menus = menuRepository.Query()
+                .Include(m => m.Children)
+                .Include(m => m.Translations).ThenInclude(t => t.Language)
                 .Where(s =>
-                    s.Language.Code == request.LanguageCode
+                    s.Translations.Any(t => t.Language.Code == request.LanguageCode)
                     && s.IsActive == true
                     && s.IsDeleted == false
-                    && (string.IsNullOrEmpty(filters.Slug) || s.Slug.Contains(filters.Slug))
-                    && (string.IsNullOrEmpty(filters.Name) || s.Title.Contains(filters.Name))
+                    && (string.IsNullOrEmpty(filters.Slug) || s.Translations.Any(t => t.Slug.Contains(filters.Slug)))
+                    && (string.IsNullOrEmpty(filters.Name) || s.Translations.Any(t => t.Title.Contains(filters.Name)))
                 );
 
             menus = menus.OrderByDynamic(request.OrderBy, request.Direction);
@@ -95,16 +96,16 @@ namespace DermaKlinik.API.Application.Services.Menu
 
         public async Task<MenuTranslationDto> UpdateTranslationAsync(Guid id, UpdateMenuTranslationDto updateMenuDto)
         {
-            var menu = await menuRepository.GetByIdAsync(id);
-            if (menu == null)
+            var menuTranslation = await menuTranslationRepository.GetByIdAsync(id);
+            if (menuTranslation == null)
             {
                 return null;
             }
 
-            mapper.Map(updateMenuDto, menu);
-            menuRepository.Update(menu);
+            mapper.Map(updateMenuDto, menuTranslation);
+            menuTranslationRepository.Update(menuTranslation);
             await unitOfWork.CompleteAsync();
-            return mapper.Map<MenuTranslationDto>(menu);
+            return mapper.Map<MenuTranslationDto>(menuTranslation);
         }
 
         public async Task DeleteAsync(Guid id)

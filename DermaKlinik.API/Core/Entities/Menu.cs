@@ -11,7 +11,7 @@ namespace DermaKlinik.API.Core.Entities
         public int SortOrder { get; set; }
         public string Slug { get; set; }
         public bool IsDeletable { get; set; }
-        public MenuType Type { get; set; }
+        public int Type { get; set; }
         public string Target { get; set; }
         public ICollection<Menu> Children { get; set; } = new List<Menu>();
         public ICollection<MenuTranslation> Translations { get; set; }

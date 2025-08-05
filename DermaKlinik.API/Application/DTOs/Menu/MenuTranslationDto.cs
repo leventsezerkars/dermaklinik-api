@@ -1,3 +1,4 @@
+using DermaKlinik.API.Application.DTOs.Language;
 using DermaKlinik.API.Core.Entities;
 
 namespace DermaKlinik.API.Application.DTOs.Menu
@@ -12,5 +13,6 @@ namespace DermaKlinik.API.Application.DTOs.Menu
         public string SeoTitle { get; set; }
         public string SeoDescription { get; set; }
         public string SeoKeywords { get; set; }
+        public virtual LanguageDto Language { get; set; }
     }
 }

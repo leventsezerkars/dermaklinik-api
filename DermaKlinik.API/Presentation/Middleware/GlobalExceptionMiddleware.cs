@@ -48,16 +48,16 @@ namespace DermaKlinik.API.Presentation.Middleware
                 case DbUpdateException dbEx:
                     context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
                     response = ApiResponse.ErrorResult(
-                        "Veritabanı işlemi sırasında bir hata oluştu.",
+                        "Veritabanı işlemi sırasında bir hata oluştu. -> " + exception.MessagesStr(),
                         HttpStatusCode.BadRequest
                     );
                     _logger.LogError(dbEx, "Veritabanı hatası: {Message}", dbEx.Message);
                     break;
 
-                case UnauthorizedAccessException:
+                case UnauthorizedAccessException unex:
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                     response = ApiResponse.ErrorResult(
-                        "Bu işlem için yetkiniz bulunmamaktadır.",
+                        "Bu işlem için yetkiniz bulunmamaktadır. -> " + exception.MessagesStr(),
                         HttpStatusCode.Unauthorized
                     );
                     break;
@@ -65,7 +65,7 @@ namespace DermaKlinik.API.Presentation.Middleware
                 default:
                     context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     response = ApiResponse.ErrorResult(
-                        "Beklenmeyen bir hata oluştu.",
+                        "Beklenmeyen bir hata oluştu. -> " + exception.MessagesStr(),
                         HttpStatusCode.InternalServerError
                     );
                     _logger.LogError(exception, "Beklenmeyen hata: {Message}", exception.Message);
