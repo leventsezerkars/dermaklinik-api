@@ -14,7 +14,6 @@ namespace DermaKlinik.API.Application.Services
         Task DeleteAsync(Guid id);
         Task<bool> IsUsernameUniqueAsync(string username);
         Task<bool> IsEmailUniqueAsync(string email);
-        Task<LoginResponseDto> LoginAsync(LoginDto loginDto);
         Task ChangePasswordAsync(ChangePasswordDto changePasswordDto);
         Task UpdateLastLoginAsync(Guid userId);
         Task<UserDto> ValidateUserAsync(string username, string password);

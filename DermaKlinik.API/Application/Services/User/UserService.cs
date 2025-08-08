@@ -3,9 +3,6 @@ using DermaKlinik.API.Application.DTOs.User;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -109,29 +106,7 @@ namespace DermaKlinik.API.Application.Services
                 .AnyAsync(u => u.Email == email);
         }
 
-        public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
-        {
-            var user = await userRepository.Query()
-                .FirstOrDefaultAsync(u => u.Username == loginDto.Username);
 
-            if (user == null || !VerifyPassword(loginDto.Password, user.PasswordHash))
-            {
-                throw new InvalidOperationException("Invalid username or password.");
-            }
-
-            if (!user.IsActive)
-            {
-                throw new InvalidOperationException("User account is not active.");
-            }
-
-            var token = GenerateJwtToken(user);
-
-            return new LoginResponseDto
-            {
-                Token = token,
-                User = mapper.Map<UserDto>(user)
-            };
-        }
 
         public async Task ChangePasswordAsync(ChangePasswordDto changePasswordDto)
         {
@@ -219,24 +194,6 @@ namespace DermaKlinik.API.Application.Services
             return HashPassword(password) == hash;
         }
 
-        private string GenerateJwtToken(Core.Entities.User user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Email, user.Email)
-                }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
     }
 }

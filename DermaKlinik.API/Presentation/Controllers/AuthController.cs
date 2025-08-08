@@ -1,6 +1,9 @@
-using DermaKlinik.API.Application.Services;
-using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Application.DTOs.User;
+using DermaKlinik.API.Application.Features.Auth.Commands.Login;
+using DermaKlinik.API.Application.Features.Auth.Commands.Logout;
+using DermaKlinik.API.Application.Features.Auth.Commands.Register;
 using DermaKlinik.API.Core.Models;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DermaKlinik.API.Presentation.Controllers
@@ -9,37 +12,40 @@ namespace DermaKlinik.API.Presentation.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IMediator _mediator;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IMediator mediator)
         {
-            _authService = authService;
+            _mediator = mediator;
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<ApiResponse<string>>> Login(LoginRequest request)
+        public async Task<ActionResult<ApiResponse<LoginResponseDto>>> Login([FromBody] LoginDto request)
         {
             if (request == null)
-                return BadRequest(ApiResponse<string>.ErrorResult("Geçersiz istek"));
+                return BadRequest(ApiResponse<LoginResponseDto>.ErrorResult("Geçersiz istek"));
 
-            var response = await _authService.LoginAsync(request);
+            var command = new LoginCommand { LoginDto = request };
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<ApiResponse<User>>> Register(RegisterRequest request)
+        public async Task<ActionResult<ApiResponse<UserDto>>> Register([FromBody] CreateUserDto request)
         {
             if (request == null)
-                return BadRequest(ApiResponse<User>.ErrorResult("Geçersiz istek"));
+                return BadRequest(ApiResponse<UserDto>.ErrorResult("Geçersiz istek"));
 
-            var response = await _authService.RegisterAsync(request);
+            var command = new RegisterCommand { CreateUserDto = request };
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
 
         [HttpPost("logout")]
-        public ActionResult<ApiResponse<bool>> Logout()
+        public async Task<ActionResult<ApiResponse<bool>>> Logout()
         {
-            var response = _authService.Logout();
+            var command = new LogoutCommand();
+            var response = await _mediator.Send(command);
             return Ok(response);
         }
     }

@@ -9,11 +9,11 @@ namespace DermaKlinik.API.Application.DTOs.CompanyInfo
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Adres zorunludur")]
-        [StringLength(1000, ErrorMessage = "Adres en fazla 1000 karakter olabilir")]
+        [StringLength(500, ErrorMessage = "Adres en fazla 500 karakter olabilir")]
         public string Address { get; set; }
 
         [Required(ErrorMessage = "Telefon numarası zorunludur")]
-        [StringLength(20, ErrorMessage = "Telefon numarası en fazla 20 karakter olabilir")]
+        [StringLength(100, ErrorMessage = "Telefon numarası en fazla 100 karakter olabilir")]
         public string Phone { get; set; }
 
         [Required(ErrorMessage = "E-posta adresi zorunludur")]
@@ -21,51 +21,34 @@ namespace DermaKlinik.API.Application.DTOs.CompanyInfo
         [StringLength(255, ErrorMessage = "E-posta adresi en fazla 255 karakter olabilir")]
         public string Email { get; set; }
 
-        [StringLength(255, ErrorMessage = "Vergi dairesi en fazla 255 karakter olabilir")]
-        public string TaxOffice { get; set; }
-
-        [StringLength(255, ErrorMessage = "Vergi numarası en fazla 255 karakter olabilir")]
-        public string TaxNumber { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir Facebook URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Facebook URL'si en fazla 255 karakter olabilir")]
-        public string FacebookUrl { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir Instagram URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Instagram URL'si en fazla 255 karakter olabilir")]
-        public string InstagramUrl { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir Twitter URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Twitter URL'si en fazla 255 karakter olabilir")]
-        public string TwitterUrl { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir Youtube URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Youtube URL'si en fazla 255 karakter olabilir")]
-        public string YoutubeUrl { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir LinkedIn URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "LinkedIn URL'si en fazla 255 karakter olabilir")]
-        public string LinkedInUrl { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir Google Maps URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Google Maps URL'si en fazla 255 karakter olabilir")]
-        public string GoogleMapsUrl { get; set; }
-
-        [Url(ErrorMessage = "Geçerli bir logo URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Logo URL'si en fazla 255 karakter olabilir")]
+        [StringLength(5000, ErrorMessage = "Logo URL'si en fazla 5000 karakter olabilir")]
         public string LogoUrl { get; set; }
 
-        [Url(ErrorMessage = "Geçerli bir favicon URL'si giriniz")]
-        [StringLength(255, ErrorMessage = "Favicon URL'si en fazla 255 karakter olabilir")]
-        public string FaviconUrl { get; set; }
+        [StringLength(255, ErrorMessage = "Facebook URL'si en fazla 255 karakter olabilir")]
+        public string Facebook { get; set; }
 
-        [StringLength(255, ErrorMessage = "Meta başlığı en fazla 255 karakter olabilir")]
+        [StringLength(255, ErrorMessage = "Twitter URL'si en fazla 255 karakter olabilir")]
+        public string Twitter { get; set; }
+
+        [StringLength(255, ErrorMessage = "Instagram URL'si en fazla 255 karakter olabilir")]
+        public string Instagram { get; set; }
+
+        [StringLength(255, ErrorMessage = "LinkedIn URL'si en fazla 255 karakter olabilir")]
+        public string LinkedIn { get; set; }
+
+        [StringLength(1000, ErrorMessage = "Google Maps URL'si en fazla 1000 karakter olabilir")]
+        public string GoogleMapsUrl { get; set; }
+
+        [StringLength(1000, ErrorMessage = "Google Analytics kodu en fazla 1000 karakter olabilir")]
+        public string GoogleAnalyticsCode { get; set; }
+
+        [StringLength(255, ErrorMessage = "Meta başlık en fazla 255 karakter olabilir")]
         public string MetaTitle { get; set; }
 
-        [StringLength(1000, ErrorMessage = "Meta açıklaması en fazla 1000 karakter olabilir")]
+        [StringLength(1000, ErrorMessage = "Meta açıklama en fazla 1000 karakter olabilir")]
         public string MetaDescription { get; set; }
 
-        [StringLength(255, ErrorMessage = "Meta anahtar kelimeleri en fazla 255 karakter olabilir")]
+        [StringLength(255, ErrorMessage = "Meta anahtar kelimeler en fazla 255 karakter olabilir")]
         public string MetaKeywords { get; set; }
 
         [StringLength(255, ErrorMessage = "Çalışma saatleri en fazla 255 karakter olabilir")]

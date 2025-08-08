@@ -9,24 +9,16 @@
   <ItemGroup>
     <Compile Remove="Application\Features\BlogCategory\**" />
     <Compile Remove="Application\Features\Blog\**" />
-    <Compile Remove="Application\Features\CompanyInfo\**" />
     <Compile Remove="Application\Features\Gallery\**" />
-    <Compile Remove="Application\Validators\**" />
     <Content Remove="Application\Features\BlogCategory\**" />
     <Content Remove="Application\Features\Blog\**" />
-    <Content Remove="Application\Features\CompanyInfo\**" />
     <Content Remove="Application\Features\Gallery\**" />
-    <Content Remove="Application\Validators\**" />
     <EmbeddedResource Remove="Application\Features\BlogCategory\**" />
     <EmbeddedResource Remove="Application\Features\Blog\**" />
-    <EmbeddedResource Remove="Application\Features\CompanyInfo\**" />
     <EmbeddedResource Remove="Application\Features\Gallery\**" />
-    <EmbeddedResource Remove="Application\Validators\**" />
     <None Remove="Application\Features\BlogCategory\**" />
     <None Remove="Application\Features\Blog\**" />
-    <None Remove="Application\Features\CompanyInfo\**" />
     <None Remove="Application\Features\Gallery\**" />
-    <None Remove="Application\Validators\**" />
   </ItemGroup>
 
   <ItemGroup>

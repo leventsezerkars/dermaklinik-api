@@ -7,6 +7,7 @@ using DermaKlinik.API.Application.DTOs.GalleryImage;
 using DermaKlinik.API.Application.DTOs.GalleryImageGroupMap;
 using DermaKlinik.API.Application.DTOs.Language;
 using DermaKlinik.API.Application.DTOs.Menu;
+using DermaKlinik.API.Application.DTOs.User;
 using DermaKlinik.API.Core.Entities;
 
 namespace DermaKlinik.API.Application.Mappings
@@ -104,6 +105,39 @@ namespace DermaKlinik.API.Application.Mappings
             CreateMap<GalleryImageGroupMap, GalleryImageGroupMapDto>();
             CreateMap<CreateGalleryImageGroupMapDto, GalleryImageGroupMap>();
             CreateMap<UpdateGalleryImageGroupMapDto, GalleryImageGroupMap>();
+
+            // User Mappings
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
+
+            CreateMap<CreateUserDto, User>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Password hash'i ayrıca işlenecek
+                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => "User")) // Varsayılan rol
+                .ForMember(dest => dest.LastLoginDate, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+            CreateMap<UpdateUserDto, User>()
+                .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.FirstName))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.LastName))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.IsActive))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.Role, opt => opt.Ignore())
+                .ForMember(dest => dest.LastLoginDate, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
         }
     }
 }

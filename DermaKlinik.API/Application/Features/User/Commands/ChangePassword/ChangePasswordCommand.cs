@@ -9,6 +9,7 @@ namespace DermaKlinik.API.Application.Features.User.Commands.ChangePassword
         public Guid Id { get; set; }
         public string CurrentPassword { get; set; }
         public string NewPassword { get; set; }
+        public string ConfirmPassword { get; set; }
     }
 
     public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, Unit>
@@ -26,7 +27,8 @@ namespace DermaKlinik.API.Application.Features.User.Commands.ChangePassword
             {
                 Id = request.Id,
                 CurrentPassword = request.CurrentPassword,
-                NewPassword = request.NewPassword
+                NewPassword = request.NewPassword,
+                ConfirmPassword = request.ConfirmPassword
             };
 
             await _userService.ChangePasswordAsync(changePasswordDto);

@@ -1,12 +1,11 @@
 using DermaKlinik.API.Application.DTOs.User;
 using DermaKlinik.API.Application.Features.User.Commands.ChangePassword;
-using DermaKlinik.API.Application.Features.User.Commands.CreateUser;
 using DermaKlinik.API.Application.Features.User.Commands.DeleteUser;
-using DermaKlinik.API.Application.Features.User.Commands.Login;
 using DermaKlinik.API.Application.Features.User.Commands.UpdateUser;
 using DermaKlinik.API.Application.Features.User.Queries.GetAllUsers;
 using DermaKlinik.API.Application.Features.User.Queries.GetUserByEmail;
 using DermaKlinik.API.Application.Features.User.Queries.GetUserById;
+using DermaKlinik.API.Application.Features.User.Queries.GetUserByUsername;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +24,7 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<ActionResult<List<UserDto>>> GetAll()
         {
             var query = new GetAllUsersQuery();
@@ -51,14 +50,16 @@ namespace DermaKlinik.API.Presentation.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpGet("username/{username}")]
         [Authorize]
-        public async Task<ActionResult<UserDto>> Create([FromBody] CreateUserDto createUserDto)
+        public async Task<ActionResult<UserDto>> GetByUsername(string username)
         {
-            var command = new CreateUserCommand { CreateUserDto = createUserDto };
-            var result = await _mediator.Send(command);
+            var query = new GetUserByUsernameQuery { Username = username };
+            var result = await _mediator.Send(query);
             return Ok(result);
         }
+
+
 
         [HttpPut("{id}")]
         [Authorize]
@@ -81,12 +82,19 @@ namespace DermaKlinik.API.Presentation.Controllers
             return NoContent();
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<LoginResponseDto>> Login([FromBody] LoginDto loginDto)
+        [HttpPost("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto changePasswordDto)
         {
-            var command = new LoginCommand { LoginDto = loginDto };
-            var result = await _mediator.Send(command);
-            return Ok(result);
+            var command = new ChangePasswordCommand 
+            { 
+                Id = changePasswordDto.Id,
+                CurrentPassword = changePasswordDto.CurrentPassword,
+                NewPassword = changePasswordDto.NewPassword,
+                ConfirmPassword = changePasswordDto.ConfirmPassword
+            };
+            await _mediator.Send(command);
+            return NoContent();
         }
     }
 }

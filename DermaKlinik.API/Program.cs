@@ -58,7 +58,15 @@ if (jwtSettings == null)
 {
     throw new InvalidOperationException("JwtSettings configuration is missing.");
 }
-var key = Encoding.ASCII.GetBytes(jwtSettings.SecretKey);
+
+// JWT Key için hem JwtSettings hem de Jwt bölümünü kontrol et
+var jwtKey = builder.Configuration["Jwt:Key"] ?? jwtSettings.SecretKey;
+if (string.IsNullOrEmpty(jwtKey))
+{
+    throw new InvalidOperationException("JWT Key is not configured in either JwtSettings.SecretKey or Jwt:Key");
+}
+
+var key = Encoding.ASCII.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -75,8 +83,8 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? jwtSettings.Issuer,
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? jwtSettings.Audience,
         ClockSkew = TimeSpan.Zero
     };
 });
@@ -109,6 +117,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IMenuService, MenuService>();
+builder.Services.AddScoped<ICompanyInfoService, CompanyInfoService>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
