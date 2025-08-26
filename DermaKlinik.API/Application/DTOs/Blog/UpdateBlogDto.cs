@@ -10,7 +10,8 @@ namespace DermaKlinik.API.Application.DTOs.Blog
         [Required]
         public Guid CategoryId { get; set; }
 
-        [Required]
-        public List<UpdateBlogTranslationDto> Translations { get; set; }
+        public List<UpdateBlogTranslationDto> Translations { get; set; } = new List<UpdateBlogTranslationDto>();
+
+        public bool IsActive { get; set; } = true;
     }
 }

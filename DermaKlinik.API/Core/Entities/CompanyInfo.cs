@@ -4,7 +4,6 @@ namespace DermaKlinik.API.Core.Entities
 {
     public class CompanyInfo : AuditableEntity
     {
-        [StringLength(5000)]
         public string LogoUrl { get; set; }
 
         [Required]

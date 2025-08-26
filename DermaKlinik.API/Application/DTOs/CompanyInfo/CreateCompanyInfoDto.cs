@@ -20,8 +20,6 @@ namespace DermaKlinik.API.Application.DTOs.CompanyInfo
         [EmailAddress(ErrorMessage = "Geçerli bir e-posta adresi giriniz")]
         [StringLength(255, ErrorMessage = "E-posta adresi en fazla 255 karakter olabilir")]
         public string Email { get; set; }
-
-        [StringLength(5000, ErrorMessage = "Logo URL'si en fazla 5000 karakter olabilir")]
         public string LogoUrl { get; set; }
 
         [StringLength(255, ErrorMessage = "Facebook URL'si en fazla 255 karakter olabilir")]

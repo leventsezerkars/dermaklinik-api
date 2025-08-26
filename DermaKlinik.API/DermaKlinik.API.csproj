@@ -7,17 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Application\Features\BlogCategory\**" />
-    <Compile Remove="Application\Features\Blog\**" />
     <Compile Remove="Application\Features\Gallery\**" />
-    <Content Remove="Application\Features\BlogCategory\**" />
-    <Content Remove="Application\Features\Blog\**" />
     <Content Remove="Application\Features\Gallery\**" />
-    <EmbeddedResource Remove="Application\Features\BlogCategory\**" />
-    <EmbeddedResource Remove="Application\Features\Blog\**" />
     <EmbeddedResource Remove="Application\Features\Gallery\**" />
-    <None Remove="Application\Features\BlogCategory\**" />
-    <None Remove="Application\Features\Blog\**" />
     <None Remove="Application\Features\Gallery\**" />
   </ItemGroup>
 

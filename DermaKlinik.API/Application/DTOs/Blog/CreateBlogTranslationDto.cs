@@ -4,8 +4,7 @@ namespace DermaKlinik.API.Application.DTOs.Blog
 {
     public class CreateBlogTranslationDto
     {
-        [Required]
-        public Guid BlogId { get; set; }
+        public Guid? BlogId { get; set; }
 
         [Required]
         public Guid LanguageId { get; set; }
@@ -29,5 +28,11 @@ namespace DermaKlinik.API.Application.DTOs.Blog
 
         [StringLength(200)]
         public string? SeoKeywords { get; set; }
+
+        public string? FeaturedImage { get; set; }
+
+        public string? VideoUrl { get; set; }
+
+        public string? DocumentUrl { get; set; }
     }
 }

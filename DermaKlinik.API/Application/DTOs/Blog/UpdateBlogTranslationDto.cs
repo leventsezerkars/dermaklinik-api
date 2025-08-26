@@ -8,8 +8,7 @@ namespace DermaKlinik.API.Application.DTOs.Blog
         public Guid Id { get; set; }
 
         [Required]
-        [StringLength(10)]
-        public string LanguageCode { get; set; }
+        public Guid LanguageId { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -30,6 +29,12 @@ namespace DermaKlinik.API.Application.DTOs.Blog
 
         [StringLength(500)]
         public string SeoKeywords { get; set; }
+
+        public string? FeaturedImage { get; set; }
+
+        public string? VideoUrl { get; set; }
+
+        public string? DocumentUrl { get; set; }
 
         public bool IsActive { get; set; }
     }

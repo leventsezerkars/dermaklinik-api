@@ -8,7 +8,8 @@ namespace DermaKlinik.API.Application.Mappings
     {
         public BlogMappingProfile()
         {
-            CreateMap<Blog, BlogDto>();
+            CreateMap<Blog, BlogDto>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Translations.FirstOrDefault().Name));
 
             CreateMap<BlogTranslation, BlogTranslationDto>();
 

@@ -1,0 +1,4 @@
+
+dotnet ef migrations add InitialCreate3 --project DermaKlinik.API
+
+dotnet ef database update --project DermaKlinik.API

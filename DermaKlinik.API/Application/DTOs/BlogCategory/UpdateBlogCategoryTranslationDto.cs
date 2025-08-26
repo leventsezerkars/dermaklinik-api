@@ -1,12 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace DermaKlinik.API.Application.DTOs.BlogCategory
 {
     public class UpdateBlogCategoryTranslationDto
     {
-        public string LanguageCode { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string MetaTitle { get; set; }
-        public string MetaDescription { get; set; }
-        public string MetaKeywords { get; set; }
+        [Required]
+        public Guid Id { get; set; }
+
+        [Required]
+        public Guid LanguageId { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; } = string.Empty;
     }
 }

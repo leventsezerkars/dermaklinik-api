@@ -275,7 +275,6 @@ namespace DermaKlinik.API.Migrations
 
                     b.Property<string>("LogoUrl")
                         .IsRequired()
-                        .HasMaxLength(5000)
                         .HasColumnType("nvarchar(max)")
                         .UseCollation("Latin1_General_CI_AI");
 

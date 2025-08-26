@@ -27,9 +27,6 @@ namespace DermaKlinik.API.Application.Validators.CompanyInfo
                 .EmailAddress().WithMessage("Geçerli bir e-posta adresi giriniz")
                 .MaximumLength(255).WithMessage("E-posta adresi en fazla 255 karakter olabilir");
 
-            RuleFor(x => x.LogoUrl)
-                .NotEmpty().WithMessage("Logo zorunludur");
-
             RuleFor(x => x.Facebook)
                 .MaximumLength(255).WithMessage("Facebook URL'si en fazla 255 karakter olabilir")
                 .When(x => !string.IsNullOrEmpty(x.Facebook));

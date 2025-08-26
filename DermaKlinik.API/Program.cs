@@ -121,6 +121,8 @@ builder.Services.AddScoped<ICompanyInfoService, CompanyInfoService>();
 builder.Services.AddScoped<ILogRepository, LogRepository>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
 
 // MediatR Configuration
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());

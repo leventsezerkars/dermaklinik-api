@@ -6,7 +6,6 @@ namespace DermaKlinik.API.Application.Common.Behaviors
 {
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
-        where TResponse : ApiResponse
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -32,8 +31,23 @@ namespace DermaKlinik.API.Application.Common.Behaviors
                 if (failures.Count != 0)
                 {
                     var errorMessages = failures.Select(x => x.ErrorMessage).ToList();
-                    var response = (TResponse)ApiResponse.ErrorResult(data: errorMessages);
-                    return response;
+                    
+                    // TResponse tipini kontrol et ve uygun response oluştur
+                    if (typeof(TResponse).IsGenericType && typeof(TResponse).GetGenericTypeDefinition() == typeof(ApiResponse<>))
+                    {
+                        var responseType = typeof(TResponse);
+                        var errorResultMethod = typeof(ApiResponse<>).MakeGenericType(responseType.GetGenericArguments()[0])
+                            .GetMethod("ErrorResult", new[] { typeof(object) });
+                        
+                        if (errorResultMethod != null)
+                        {
+                            var response = (TResponse)errorResultMethod.Invoke(null, new object[] { errorMessages });
+                            return response;
+                        }
+                    }
+                    
+                    // Generic response oluşturulamazsa exception fırlat
+                    throw new ValidationException(failures);
                 }
             }
 
