@@ -123,6 +123,9 @@ builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<ILanguageService, LanguageService>();
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
+builder.Services.AddScoped<IGalleryImageService, GalleryImageService>();
+builder.Services.AddScoped<IGalleryGroupService, GalleryGroupService>();
+builder.Services.AddScoped<IGalleryImageGroupMapService, GalleryImageGroupMapService>();
 
 // MediatR Configuration
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());

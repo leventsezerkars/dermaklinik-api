@@ -1,54 +1,187 @@
 using AutoMapper;
 using DermaKlinik.API.Application.DTOs.GalleryImage;
+using DermaKlinik.API.Application.DTOs.GalleryImageGroupMap;
+using DermaKlinik.API.Application.DTOs.GalleryGroup;
+using DermaKlinik.API.Core.Entities;
 using DermaKlinik.API.Core.Interfaces;
+using DermaKlinik.API.Core.Models;
 using DermaKlinik.API.Infrastructure.Repositories;
+using DermaKlinik.API.Infrastructure.UnitOfWork;
+using Microsoft.EntityFrameworkCore;
 
 namespace DermaKlinik.API.Application.Services
 {
-    public class GalleryImageService(IUnitOfWork unitOfWork, IMapper mapper, IGalleryImageRepository galleryImageRepository) : IGalleryImageService
+    public class GalleryImageService : IGalleryImageService
     {
+        private readonly IGalleryImageRepository _galleryImageRepository;
+        private readonly IGalleryImageGroupMapService _mapService;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public GalleryImageService(
+            IGalleryImageRepository galleryImageRepository, 
+            IGalleryImageGroupMapService mapService,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
+        {
+            _galleryImageRepository = galleryImageRepository;
+            _mapService = mapService;
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
+
         public async Task<GalleryImageDto> GetByIdAsync(Guid id)
         {
-            var galleryImage = await galleryImageRepository.GetByIdAsync(id);
-            return mapper.Map<GalleryImageDto>(galleryImage);
+            var image = await _galleryImageRepository.GetByIdAsync(id);
+            if (image == null)
+                throw new Exception("Resim bulunamadı");
+
+            var groups = await _mapService.GetByImageIdAsync(id);
+            var groupDtos = groups.Select(g => _mapper.Map<GalleryGroupDto>(g.Group)).ToList();
+
+            var imageDto = _mapper.Map<GalleryImageDto>(image);
+            imageDto.Groups = groupDtos;
+
+            return imageDto;
         }
 
-        public async Task<IEnumerable<GalleryImageDto>> GetAllAsync()
+        public async Task<List<GalleryImageDto>> GetAllAsync(PagingRequestModel request, Guid? groupId = null)
         {
-            var galleryImages = galleryImageRepository.GetAll();
-            return mapper.Map<IEnumerable<GalleryImageDto>>(galleryImages);
-        }
+            var query = _galleryImageRepository.GetAll();
 
-        public async Task<GalleryImageDto> CreateAsync(CreateGalleryImageDto createGalleryImageDto)
-        {
-            var galleryImage = mapper.Map<Core.Entities.GalleryImage>(createGalleryImageDto);
-            await galleryImageRepository.AddAsync(galleryImage);
-            await unitOfWork.CompleteAsync();
-            return mapper.Map<GalleryImageDto>(galleryImage);
-        }
-
-        public async Task<GalleryImageDto> UpdateAsync(Guid id, UpdateGalleryImageDto updateGalleryImageDto)
-        {
-            var galleryImage = await galleryImageRepository.GetByIdAsync(id);
-            if (galleryImage == null)
+            if (groupId.HasValue)
             {
-                return null;
+                query = query.Where(i => i.GroupMaps.Any(gm => gm.GroupId == groupId));
             }
 
-            mapper.Map(updateGalleryImageDto, galleryImage);
-            galleryImageRepository.Update(galleryImage);
-            await unitOfWork.CompleteAsync();
-            return mapper.Map<GalleryImageDto>(galleryImage);
+            var images = await query
+                .Skip((request.Page - 1) * request.Take)
+                .Take(request.Take)
+                .ToListAsync();
+
+            var result = new List<GalleryImageDto>();
+            foreach (var image in images)
+            {
+                var groups = await _mapService.GetByImageIdAsync(image.Id);
+                var groupDtos = groups.Select(g => _mapper.Map<GalleryGroupDto>(g.Group)).ToList();
+
+                var imageDto = _mapper.Map<GalleryImageDto>(image);
+                imageDto.Groups = groupDtos;
+                result.Add(imageDto);
+            }
+
+            return result;
+        }
+
+        public async Task<GalleryImageDto> CreateAsync(CreateGalleryImageDto createDto)
+        {
+            var image = _mapper.Map<GalleryImage>(createDto);
+
+            await _galleryImageRepository.AddAsync(image);
+            await _unitOfWork.CompleteAsync();
+
+            // Gruplara ekle
+            if (createDto.GroupIds != null && createDto.GroupIds.Any())
+            {
+                foreach (var groupId in createDto.GroupIds)
+                {
+                    await AddToGroupAsync(image.Id, groupId);
+                }
+            }
+
+            return await GetByIdAsync(image.Id);
+        }
+
+        public async Task<GalleryImageDto> UpdateAsync(Guid id, UpdateGalleryImageDto updateDto)
+        {
+            var image = await _galleryImageRepository.GetByIdAsync(id);
+            if (image == null)
+                throw new Exception("Resim bulunamadı");
+
+            _mapper.Map(updateDto, image);
+            image.UpdatedAt = DateTime.UtcNow;
+
+            _galleryImageRepository.Update(image);
+
+            // Mevcut grup ilişkilerini temizle
+            var existingMaps = await _mapService.GetByImageIdAsync(id);
+            foreach (var map in existingMaps)
+            {
+                await _mapService.DeleteAsync(map.Id);
+            }
+
+            // Yeni grup ilişkilerini ekle
+            if (updateDto.GroupIds != null && updateDto.GroupIds.Any())
+            {
+                foreach (var groupId in updateDto.GroupIds)
+                {
+                    await AddToGroupAsync(id, groupId);
+                }
+            }
+
+            await _unitOfWork.CompleteAsync();
+            return await GetByIdAsync(id);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            var galleryImage = await galleryImageRepository.GetByIdAsync(id);
-            if (galleryImage != null)
+            var image = await _galleryImageRepository.GetByIdAsync(id);
+            if (image == null)
+                throw new Exception("Resim bulunamadı");
+
+            image.IsActive = false;
+            image.UpdatedAt = DateTime.UtcNow;
+
+            _galleryImageRepository.Update(image);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task HardDeleteAsync(Guid id)
+        {
+            var image = await _galleryImageRepository.GetByIdAsync(id);
+            if (image == null)
+                throw new Exception("Resim bulunamadı");
+
+            // Grup ilişkilerini sil
+            var existingMaps = await _mapService.GetByImageIdAsync(id);
+            foreach (var map in existingMaps)
             {
-                galleryImageRepository.SoftDelete(galleryImage);
-                await unitOfWork.CompleteAsync();
+                await _mapService.HardDeleteAsync(map.Id);
             }
+
+            _galleryImageRepository.HardDelete(image);
+            await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task AddToGroupAsync(Guid imageId, Guid groupId, int sortOrder = 0)
+        {
+            var existingMap = await _mapService.GetByImageIdAsync(imageId);
+            if (existingMap.Any(gm => gm.GroupId == groupId))
+                return; // Zaten grupta
+
+            var createDto = new CreateGalleryImageGroupMapDto
+            {
+                ImageId = imageId,
+                GroupId = groupId,
+                SortOrder = sortOrder
+            };
+
+            await _mapService.CreateAsync(createDto);
+        }
+
+        public async Task RemoveFromGroupAsync(Guid imageId, Guid groupId)
+        {
+            var existingMaps = await _mapService.GetByImageIdAsync(imageId);
+            var map = existingMaps.FirstOrDefault(gm => gm.GroupId == groupId);
+            if (map != null)
+            {
+                await _mapService.DeleteAsync(map.Id);
+            }
+        }
+
+        public async Task UpdateImageOrderAsync(Guid imageId, Guid groupId, int newSortOrder)
+        {
+            await _mapService.UpdateSortOrderAsync(imageId, groupId, newSortOrder);
         }
     }
 }

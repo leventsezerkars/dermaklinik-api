@@ -1,6 +1,7 @@
 using AutoMapper;
 using DermaKlinik.API.Application.DTOs.GalleryGroup;
 using DermaKlinik.API.Application.DTOs.GalleryImage;
+using DermaKlinik.API.Application.DTOs.GalleryImageGroupMap;
 using DermaKlinik.API.Core.Entities;
 
 namespace DermaKlinik.API.Application.Mappings
@@ -11,6 +12,7 @@ namespace DermaKlinik.API.Application.Mappings
         {
             CreateMap<GalleryImage, GalleryImageDto>();
             CreateMap<GalleryGroup, GalleryGroupDto>();
+            CreateMap<GalleryImageGroupMap, GalleryImageGroupMapDto>();
 
             CreateMap<CreateGalleryImageDto, GalleryImage>()
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
@@ -18,8 +20,12 @@ namespace DermaKlinik.API.Application.Mappings
             CreateMap<CreateGalleryGroupDto, GalleryGroup>()
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
 
+            CreateMap<CreateGalleryImageGroupMapDto, GalleryImageGroupMap>()
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
+
             CreateMap<UpdateGalleryImageDto, GalleryImage>();
             CreateMap<UpdateGalleryGroupDto, GalleryGroup>();
+            CreateMap<UpdateGalleryImageGroupMapDto, GalleryImageGroupMap>();
         }
     }
 }

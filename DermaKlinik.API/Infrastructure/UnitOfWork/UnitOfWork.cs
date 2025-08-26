@@ -1,3 +1,4 @@
+using DermaKlinik.API.Core.Extensions;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -92,7 +93,7 @@ namespace DermaKlinik.API.Infrastructure.UnitOfWork
             }
             catch (DbUpdateException ex)
             {
-                throw new Exception("Veritabanı güncelleme hatası oluştu.", ex);
+                throw new Exception("Veritabanı güncelleme hatası oluştu." + ex.MessagesStr(), ex);
             }
         }
     }
