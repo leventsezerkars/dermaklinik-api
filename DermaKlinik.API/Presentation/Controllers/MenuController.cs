@@ -2,14 +2,14 @@ using DermaKlinik.API.Application.DTOs.Menu;
 using DermaKlinik.API.Application.Features.Menu.Commands;
 using DermaKlinik.API.Application.Features.Menu.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DermaKlinik.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
-
+    [Authorize] // Hem JWT hem de API Key authentication'ı destekler
     public class MenuController : ControllerBase
     {
         private readonly IMediator _mediator;

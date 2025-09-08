@@ -15,6 +15,7 @@ namespace DermaKlinik.API.Application.Mappings
             CreateMap<GalleryImageGroupMap, GalleryImageGroupMapDto>();
 
             CreateMap<CreateGalleryImageDto, GalleryImage>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore()) // ImageUrl artık manuel olarak set ediliyor
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
 
             CreateMap<CreateGalleryGroupDto, GalleryGroup>()
@@ -23,7 +24,8 @@ namespace DermaKlinik.API.Application.Mappings
             CreateMap<CreateGalleryImageGroupMapDto, GalleryImageGroupMap>()
                 .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true));
 
-            CreateMap<UpdateGalleryImageDto, GalleryImage>();
+            CreateMap<UpdateGalleryImageDto, GalleryImage>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore()); // ImageUrl artık manuel olarak set ediliyor
             CreateMap<UpdateGalleryGroupDto, GalleryGroup>();
             CreateMap<UpdateGalleryImageGroupMapDto, GalleryImageGroupMap>();
         }

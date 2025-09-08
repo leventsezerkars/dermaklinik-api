@@ -11,7 +11,7 @@ namespace DermaKlinik.API.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize] // Hem JWT hem de API Key authentication'ı destekler
     public class LanguageController : ControllerBase
     {
         private readonly IMediator _mediator;

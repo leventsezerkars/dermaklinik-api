@@ -42,7 +42,7 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateGalleryImageDto createDto)
+        public async Task<IActionResult> Create([FromForm] CreateGalleryImageDto createDto)
         {
             var command = new CreateGalleryImageCommand
             {
@@ -54,7 +54,7 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateGalleryImageDto updateDto)
+        public async Task<IActionResult> Update(Guid id, [FromForm] UpdateGalleryImageDto updateDto)
         {
             var command = new UpdateGalleryImageCommand
             {

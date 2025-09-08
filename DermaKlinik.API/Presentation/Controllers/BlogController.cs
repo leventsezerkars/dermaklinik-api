@@ -3,13 +3,14 @@ using DermaKlinik.API.Application.Features.Blog.Commands;
 using DermaKlinik.API.Application.Features.Blog.Queries;
 using DermaKlinik.API.Core.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DermaKlinik.API.Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize]
+    [Authorize] // Hem JWT hem de API Key authentication'ı destekler
     public class BlogController : ControllerBase
     {
         private readonly IMediator _mediator;

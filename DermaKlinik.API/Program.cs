@@ -4,6 +4,7 @@ using DermaKlinik.API.Application.Services.Menu;
 using DermaKlinik.API.Core.Entities;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Core.Models;
+using DermaKlinik.API.Core.Extensions;
 using DermaKlinik.API.Infrastructure.Data;
 using DermaKlinik.API.Infrastructure.Repositories;
 using DermaKlinik.API.Infrastructure.UnitOfWork;
@@ -51,43 +52,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         sqlOptions.EnableRetryOnFailure();
     }));
 
-// JWT Configuration
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-if (jwtSettings == null)
-{
-    throw new InvalidOperationException("JwtSettings configuration is missing.");
-}
-
-// JWT Key için hem JwtSettings hem de Jwt bölümünü kontrol et
-var jwtKey = builder.Configuration["Jwt:Key"] ?? jwtSettings.SecretKey;
-if (string.IsNullOrEmpty(jwtKey))
-{
-    throw new InvalidOperationException("JWT Key is not configured in either JwtSettings.SecretKey or Jwt:Key");
-}
-
-var key = Encoding.ASCII.GetBytes(jwtKey);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = false;
-    options.SaveToken = true;
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? jwtSettings.Issuer,
-        ValidAudience = builder.Configuration["Jwt:Audience"] ?? jwtSettings.Audience,
-        ClockSkew = TimeSpan.Zero
-    };
-});
+// Dual Authentication Configuration (JWT + API Key)
+builder.Services.AddDualAuthentication(builder.Configuration);
 
 // Repository ve Service kayıtları
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -126,6 +92,7 @@ builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
 builder.Services.AddScoped<IGalleryImageService, GalleryImageService>();
 builder.Services.AddScoped<IGalleryGroupService, GalleryGroupService>();
 builder.Services.AddScoped<IGalleryImageGroupMapService, GalleryImageGroupMapService>();
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 // MediatR Configuration
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
@@ -150,6 +117,15 @@ builder.Services.AddSwaggerGen(c =>
         Scheme = "Bearer"
     });
 
+    // API Key Authentication için Swagger yapılandırması
+    c.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+    {
+        Description = "API Key Authentication. Example: \"X-API-Key: {your-api-key}\"",
+        Name = "X-API-Key",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    });
+
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -159,6 +135,17 @@ builder.Services.AddSwaggerGen(c =>
                 {
                     Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        },
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "ApiKey"
                 }
             },
             Array.Empty<string>()
@@ -176,7 +163,7 @@ builder.Services.AddCors(options =>
                 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
                 policyBuilder.WithOrigins(allowedOrigins)
                              .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                             .WithHeaders("Authorization", "Content-Type", "Accept", "X-Requested-With")
+                             .WithHeaders("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-API-Key")
                              .WithExposedHeaders("X-Pagination")
                              .SetIsOriginAllowed(origin => true)
                              .AllowCredentials();
@@ -195,6 +182,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Static files serving
+app.UseStaticFiles();
 
 // Global Exception Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();

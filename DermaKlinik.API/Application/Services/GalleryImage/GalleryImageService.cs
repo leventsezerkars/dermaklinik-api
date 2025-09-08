@@ -17,17 +17,20 @@ namespace DermaKlinik.API.Application.Services
         private readonly IGalleryImageGroupMapService _mapService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFileUploadService _fileUploadService;
 
         public GalleryImageService(
             IGalleryImageRepository galleryImageRepository, 
             IGalleryImageGroupMapService mapService,
             IUnitOfWork unitOfWork,
-            IMapper mapper)
+            IMapper mapper,
+            IFileUploadService fileUploadService)
         {
             _galleryImageRepository = galleryImageRepository;
             _mapService = mapService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _fileUploadService = fileUploadService;
         }
 
         public async Task<GalleryImageDto> GetByIdAsync(Guid id)
@@ -41,6 +44,9 @@ namespace DermaKlinik.API.Application.Services
 
             var imageDto = _mapper.Map<GalleryImageDto>(image);
             imageDto.Groups = groupDtos;
+            
+            // Tam URL'yi oluştur
+            imageDto.ImageUrl = await _fileUploadService.GetImageUrlAsync(image.ImageUrl);
 
             return imageDto;
         }
@@ -67,6 +73,10 @@ namespace DermaKlinik.API.Application.Services
 
                 var imageDto = _mapper.Map<GalleryImageDto>(image);
                 imageDto.Groups = groupDtos;
+                
+                // Tam URL'yi oluştur
+                imageDto.ImageUrl = await _fileUploadService.GetImageUrlAsync(image.ImageUrl);
+                
                 result.Add(imageDto);
             }
 
@@ -75,7 +85,17 @@ namespace DermaKlinik.API.Application.Services
 
         public async Task<GalleryImageDto> CreateAsync(CreateGalleryImageDto createDto)
         {
-            var image = _mapper.Map<GalleryImage>(createDto);
+            // Resim dosyasını yükle
+            var imagePath = await _fileUploadService.UploadImageAsync(createDto.ImageFile, "gallery");
+            
+            var image = new GalleryImage
+            {
+                ImageUrl = imagePath,
+                Title = createDto.Title,
+                AltText = createDto.AltText,
+                Caption = createDto.Caption,
+                IsActive = createDto.IsActive
+            };
 
             await _galleryImageRepository.AddAsync(image);
             await _unitOfWork.CompleteAsync();
@@ -98,7 +118,22 @@ namespace DermaKlinik.API.Application.Services
             if (image == null)
                 throw new Exception("Resim bulunamadı");
 
-            _mapper.Map(updateDto, image);
+            // Eğer yeni resim dosyası yüklenmişse, eski dosyayı sil ve yeni dosyayı yükle
+            if (updateDto.ImageFile != null)
+            {
+                // Eski dosyayı sil
+                await _fileUploadService.DeleteImageAsync(image.ImageUrl);
+                
+                // Yeni dosyayı yükle
+                var newImagePath = await _fileUploadService.UploadImageAsync(updateDto.ImageFile, "gallery");
+                image.ImageUrl = newImagePath;
+            }
+
+            // Diğer alanları güncelle
+            image.Title = updateDto.Title;
+            image.AltText = updateDto.AltText;
+            image.Caption = updateDto.Caption;
+            image.IsActive = updateDto.IsActive;
             image.UpdatedAt = DateTime.UtcNow;
 
             _galleryImageRepository.Update(image);
@@ -141,6 +176,9 @@ namespace DermaKlinik.API.Application.Services
             var image = await _galleryImageRepository.GetByIdAsync(id);
             if (image == null)
                 throw new Exception("Resim bulunamadı");
+
+            // Fiziksel dosyayı sil
+            await _fileUploadService.DeleteImageAsync(image.ImageUrl);
 
             // Grup ilişkilerini sil
             var existingMaps = await _mapService.GetByImageIdAsync(id);
