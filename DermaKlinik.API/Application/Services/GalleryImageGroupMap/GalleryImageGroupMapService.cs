@@ -82,7 +82,7 @@ namespace DermaKlinik.API.Application.Services
             if (map == null)
                 throw new Exception("Grup-Resim eşleşmesi bulunamadı");
 
-            map.IsActive = false;
+            map.IsDeleted = false;
             map.UpdatedAt = DateTime.UtcNow;
 
             _galleryImageGroupMapRepository.Update(map);

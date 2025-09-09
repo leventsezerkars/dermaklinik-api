@@ -8,10 +8,9 @@ namespace DermaKlinik.API.Application.Validators.Menu
         public CreateMenuDtoValidator()
         {
             RuleFor(x => x.Slug)
-                .NotEmpty().WithMessage("Menu slug'ı zorunludur")
-                .MaximumLength(255).WithMessage("Menu slug'ı en fazla 255 karakter olabilir")
-                .Matches(@"^[a-z0-9]+(?:-[a-z0-9]+)*$").WithMessage("Geçerli bir slug formatı giriniz (sadece küçük harf, rakam ve tire)");
-
+               .MaximumLength(255).WithMessage("Menü slug'ı en fazla 255 karakter olabilir")
+               .Matches(@"^[a-z0-9]+(?:-[a-z0-9]+)*$").WithMessage("Geçerli bir slug formatı giriniz (sadece küçük harf, rakam ve tire)")
+               .When(x => !string.IsNullOrEmpty(x.Slug));
             RuleFor(x => x.SortOrder)
                 .GreaterThanOrEqualTo(0).WithMessage("Sıralama değeri 0'dan küçük olamaz");
 

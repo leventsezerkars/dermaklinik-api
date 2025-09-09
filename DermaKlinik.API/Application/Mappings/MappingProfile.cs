@@ -101,11 +101,6 @@ namespace DermaKlinik.API.Application.Mappings
             //CreateMap<UpdateGalleryGroupDto, GalleryGroup>()
             //    .ForMember(dest => dest.GalleryImageGroupMaps, opt => opt.Ignore());
 
-            // GalleryImageGroupMap Mappings
-            CreateMap<GalleryImageGroupMap, GalleryImageGroupMapDto>();
-            CreateMap<CreateGalleryImageGroupMapDto, GalleryImageGroupMap>();
-            CreateMap<UpdateGalleryImageGroupMapDto, GalleryImageGroupMap>();
-
             // User Mappings
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))

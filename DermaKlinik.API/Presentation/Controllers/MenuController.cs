@@ -1,6 +1,8 @@
 using DermaKlinik.API.Application.DTOs.Menu;
 using DermaKlinik.API.Application.Features.Menu.Commands;
 using DermaKlinik.API.Application.Features.Menu.Queries;
+using DermaKlinik.API.Application.Models.FilterModels;
+using DermaKlinik.API.Core.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +22,9 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<MenuDto>>> GetAll()
+        public async Task<ActionResult<List<MenuDto>>> GetAll([FromQuery] PagingRequestModel request, [FromQuery] MenuFilter filters)
         {
-            var query = new GetAllMenusQuery();
+            var query = new GetAllMenusQuery() { Request = request, Filters = filters };
             var result = await _mediator.Send(query);
             return Ok(result);
         }

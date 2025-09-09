@@ -142,7 +142,7 @@ namespace DermaKlinik.API.Application.Services
             var existingMaps = await _mapService.GetByImageIdAsync(id);
             foreach (var map in existingMaps)
             {
-                await _mapService.DeleteAsync(map.Id);
+                await _mapService.HardDeleteAsync(map.Id);
             }
 
             // Yeni grup ilişkilerini ekle
