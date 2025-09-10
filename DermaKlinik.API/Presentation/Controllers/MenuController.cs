@@ -57,8 +57,8 @@ namespace DermaKlinik.API.Presentation.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var command = new DeleteMenuCommand { Id = id };
-            await _mediator.Send(command);
-            return NoContent();
+            var result = await _mediator.Send(command);
+            return Ok(result);
         }
     }
 }

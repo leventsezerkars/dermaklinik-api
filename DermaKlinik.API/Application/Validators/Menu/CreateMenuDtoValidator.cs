@@ -21,13 +21,10 @@ namespace DermaKlinik.API.Application.Validators.Menu
                 .MaximumLength(20).WithMessage("Hedef değeri en fazla 20 karakter olabilir")
                 .When(x => !string.IsNullOrEmpty(x.Target));
 
-            RuleFor(x => x.Translations)
-                .NotEmpty().WithMessage("En az bir dil için çeviri zorunludur")
-                .Must(translations => translations != null && translations.Any())
-                .WithMessage("En az bir dil için çeviri zorunludur");
-
+            // Translations opsiyonel - null veya boş olabilir
             RuleForEach(x => x.Translations)
-                .SetValidator(new CreateMenuTranslationDtoValidator());
+                .SetValidator(new CreateMenuTranslationDtoValidator())
+                .When(x => x.Translations != null && x.Translations.Any());
         }
     }
 }

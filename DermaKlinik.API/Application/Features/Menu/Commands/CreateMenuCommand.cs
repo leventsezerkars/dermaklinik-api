@@ -26,12 +26,21 @@ namespace DermaKlinik.API.Application.Features.Menu.Commands
                 if (request.CreateMenuDto.Slug == null)
                     request.CreateMenuDto.Slug = "";
 
+                if (request.CreateMenuDto.Target == null)
+                    request.CreateMenuDto.Target = "";
+
                 var result = await _menuService.CreateAsync(request.CreateMenuDto);
-                foreach (var item in request.CreateMenuDto.Translations)
+                
+                // Translations null veya boş değilse çevirileri oluştur
+                if (request.CreateMenuDto.Translations != null && request.CreateMenuDto.Translations.Count != 0)
                 {
-                    item.MenuId = result.Id;
-                    await _menuService.CreateTranslationAsync(item);
+                    foreach (var item in request.CreateMenuDto.Translations)
+                    {
+                        item.MenuId = result.Id;
+                        await _menuService.CreateTranslationAsync(item);
+                    }
                 }
+                
                 return ApiResponse<MenuDto>.SuccessResult(result);
             }
             catch (Exception ex)

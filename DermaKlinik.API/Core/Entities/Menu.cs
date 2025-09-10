@@ -16,12 +16,4 @@ namespace DermaKlinik.API.Core.Entities
         public ICollection<Menu> Children { get; set; } = new List<Menu>();
         public ICollection<MenuTranslation> Translations { get; set; }
     }
-
-    public enum MenuType
-    {
-        Page = 0,
-        Link = 1,
-        Content = 2,
-        Anchor = 3
-    }
 }

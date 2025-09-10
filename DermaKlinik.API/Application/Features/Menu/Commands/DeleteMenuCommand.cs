@@ -22,7 +22,7 @@ namespace DermaKlinik.API.Application.Features.Menu.Commands
         {
             try
             {
-                await _menuService.DeleteAsync(request.Id);
+                await _menuService.HardDeleteAsync(request.Id);
                 return ApiResponse<bool>.SuccessResult(true);
             }
             catch (Exception ex)

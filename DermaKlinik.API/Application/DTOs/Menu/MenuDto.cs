@@ -18,7 +18,6 @@ namespace DermaKlinik.API.Application.DTOs.Menu
     {
         Page = 0,
         Link = 1,
-        Content = 2,
-        Anchor = 3
+        Anchor = 2
     }
 }

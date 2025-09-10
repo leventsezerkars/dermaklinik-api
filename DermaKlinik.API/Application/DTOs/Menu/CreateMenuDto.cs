@@ -10,6 +10,6 @@ namespace DermaKlinik.API.Application.DTOs.Menu
         public bool IsDeletable { get; set; }
         public MenuType Type { get; set; }
         public string Target { get; set; }
-        public List<CreateMenuTranslationDto> Translations { get; set; }
+        public List<CreateMenuTranslationDto>? Translations { get; set; }
     }
 }

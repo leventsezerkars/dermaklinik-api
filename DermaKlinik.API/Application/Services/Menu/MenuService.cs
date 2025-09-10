@@ -92,8 +92,6 @@ namespace DermaKlinik.API.Application.Services.Menu
             return mapper.Map<MenuDto>(menu);
         }
 
-
-
         public async Task<MenuTranslationDto> UpdateTranslationAsync(Guid id, UpdateMenuTranslationDto updateMenuDto)
         {
             var menuTranslation = await menuTranslationRepository.GetByIdAsync(id);
@@ -110,20 +108,20 @@ namespace DermaKlinik.API.Application.Services.Menu
 
         public async Task DeleteAsync(Guid id)
         {
-            var menu = await menuTranslationRepository.GetByIdAsync(id);
+            var menu = await menuRepository.GetByIdAsync(id);
             if (menu != null)
             {
-                menuTranslationRepository.SoftDelete(menu);
+                menuRepository.SoftDelete(menu);
                 await unitOfWork.CompleteAsync();
             }
         }
 
         public async Task HardDeleteAsync(Guid id)
         {
-            var menu = await menuTranslationRepository.GetByIdAsync(id);
+            var menu = await menuRepository.GetByIdAsync(id);
             if (menu != null)
             {
-                menuTranslationRepository.HardDelete(menu);
+                menuRepository.HardDelete(menu);
                 await unitOfWork.CompleteAsync();
             }
         }
