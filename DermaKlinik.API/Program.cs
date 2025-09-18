@@ -93,6 +93,7 @@ builder.Services.AddScoped<IGalleryImageService, GalleryImageService>();
 builder.Services.AddScoped<IGalleryGroupService, GalleryGroupService>();
 builder.Services.AddScoped<IGalleryImageGroupMapService, GalleryImageGroupMapService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<IImageResizeService, ImageResizeService>();
 
 // MediatR Configuration
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly());
