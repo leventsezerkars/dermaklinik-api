@@ -45,9 +45,9 @@ namespace DermaKlinik.API.Presentation.Controllers
         }
 
         [HttpGet("slug/{slug}")]
-        public async Task<ActionResult<BlogDto>> GetBySlug(string slug, [FromQuery] Guid? languageId = null)
+        public async Task<ActionResult<BlogDto>> GetBySlug(string slug, [FromQuery] string languageCode = null)
         {
-            var query = new GetBlogBySlugQuery { Slug = slug, LanguageId = languageId };
+            var query = new GetBlogBySlugQuery { Slug = slug, LanguageCode = languageCode };
             var result = await _mediator.Send(query);
             return Ok(result);
         }

@@ -8,7 +8,7 @@ namespace DermaKlinik.API.Application.Features.Blog.Queries
     public class GetBlogBySlugQuery : IRequest<ApiResponse<BlogDto>>
     {
         public string Slug { get; set; }
-        public Guid? LanguageId { get; set; }
+        public string LanguageCode { get; set; }
     }
 
     public class GetBlogBySlugQueryHandler : IRequestHandler<GetBlogBySlugQuery, ApiResponse<BlogDto>>
@@ -24,7 +24,7 @@ namespace DermaKlinik.API.Application.Features.Blog.Queries
         {
             try
             {
-                var result = await _blogService.GetBySlugAsync(request.Slug, request.LanguageId);
+                var result = await _blogService.GetBySlugAsync(request.Slug, request.LanguageCode);
                 return ApiResponse<BlogDto>.SuccessResult(result);
             }
             catch (Exception ex)

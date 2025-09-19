@@ -13,7 +13,8 @@ namespace DermaKlinik.API.Application.Mappings
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Translations.FirstOrDefault().Name))
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category));
 
-            CreateMap<BlogTranslation, BlogTranslationDto>();
+            CreateMap<BlogTranslation, BlogTranslationDto>()
+                .ForMember(dest => dest.Language, opt => opt.MapFrom(src => src.Language));
 
             CreateMap<CreateBlogDto, Blog>()
                 .ForMember(dest => dest.ViewCount, opt => opt.MapFrom(src => 0))

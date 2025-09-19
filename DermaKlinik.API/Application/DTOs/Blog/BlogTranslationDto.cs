@@ -1,8 +1,9 @@
 using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Application.DTOs.Language;
 
 namespace DermaKlinik.API.Application.DTOs.Blog
 {
-    public class BlogTranslationDto : AuditableEntity
+    public class BlogTranslationDto : AuditableDto
     {
         public Guid Id { get; set; }
         public Guid BlogId { get; set; }
@@ -16,7 +17,6 @@ namespace DermaKlinik.API.Application.DTOs.Blog
         public string? FeaturedImage { get; set; }
         public string? VideoUrl { get; set; }
         public string? DocumentUrl { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        public LanguageDto? Language { get; set; }
     }
 }

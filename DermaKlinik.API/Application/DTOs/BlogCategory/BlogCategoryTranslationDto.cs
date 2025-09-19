@@ -1,3 +1,4 @@
+using DermaKlinik.API.Application.DTOs.Language;
 using DermaKlinik.API.Core.Entities;
 
 namespace DermaKlinik.API.Application.DTOs.BlogCategory
@@ -10,5 +11,7 @@ namespace DermaKlinik.API.Application.DTOs.BlogCategory
         public string Name { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public LanguageDto Language { get; set; }
+
     }
 }

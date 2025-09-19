@@ -49,6 +49,15 @@ namespace DermaKlinik.API.Application.Services
                     blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(translation);
                 }
             }
+            else
+            {
+                // Eğer languageId belirtilmemişse, ilk çeviriyi al
+                var firstTranslation = blog.Translations?.FirstOrDefault();
+                if (firstTranslation != null)
+                {
+                    blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(firstTranslation);
+                }
+            }
 
             return blogDto;
         }
@@ -80,6 +89,19 @@ namespace DermaKlinik.API.Application.Services
                     if (categoryTranslation != null)
                         blogDto.CategoryName = categoryTranslation.Name;
                 }
+                else
+                {
+                    // Eğer languageId belirtilmemişse, ilk çeviriyi al
+                    var firstTranslation = blog?.Translations?.FirstOrDefault();
+                    if (firstTranslation != null)
+                    {
+                        blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(firstTranslation);
+                    }
+                    
+                    var firstCategoryTranslation = blog?.Category?.Translations?.FirstOrDefault();
+                    if (firstCategoryTranslation != null)
+                        blogDto.CategoryName = firstCategoryTranslation.Name;
+                }
             }
 
             return blogDtos;
@@ -110,7 +132,9 @@ namespace DermaKlinik.API.Application.Services
             await _blogTranslationRepository.AddAsync(translation);
             await _unitOfWork.CompleteAsync();
 
-            return _mapper.Map<BlogTranslationDto>(translation);
+            // Language bilgisini de almak için tekrar çek
+            var createdTranslation = await _blogTranslationRepository.GetByIdAsync(translation.Id);
+            return _mapper.Map<BlogTranslationDto>(createdTranslation);
         }
 
         public async Task<BlogDto> UpdateAsync(Guid id, UpdateBlogDto updateBlogDto)
@@ -141,15 +165,17 @@ namespace DermaKlinik.API.Application.Services
             translation.SeoTitle = updateBlogTranslationDto.SeoTitle;
             translation.SeoDescription = updateBlogTranslationDto.SeoDescription;
             translation.SeoKeywords = updateBlogTranslationDto.SeoKeywords;
-            translation.FeaturedImage = updateBlogTranslationDto.FeaturedImage;
-            translation.VideoUrl = updateBlogTranslationDto.VideoUrl;
-            translation.DocumentUrl = updateBlogTranslationDto.DocumentUrl;
+            translation.FeaturedImage = updateBlogTranslationDto.FeaturedImage ?? string.Empty;
+            translation.VideoUrl = updateBlogTranslationDto.VideoUrl ?? string.Empty;
+            translation.DocumentUrl = updateBlogTranslationDto.DocumentUrl ?? string.Empty;
             translation.UpdatedAt = DateTime.UtcNow;
 
             _blogTranslationRepository.Update(translation);
             await _unitOfWork.CompleteAsync();
 
-            return _mapper.Map<BlogTranslationDto>(translation);
+            // Language bilgisini de almak için tekrar çek
+            var updatedTranslation = await _blogTranslationRepository.GetByIdAsync(id);
+            return _mapper.Map<BlogTranslationDto>(updatedTranslation);
         }
 
         public async Task DeleteAsync(Guid id)
@@ -188,7 +214,7 @@ namespace DermaKlinik.API.Application.Services
             await _unitOfWork.CompleteAsync();
         }
 
-        public async Task<BlogDto> GetBySlugAsync(string slug, Guid? languageId = null)
+        public async Task<BlogDto> GetBySlugAsync(string slug, string? languageCode = null)
         {
             var blog = await _blogRepository.GetBySlugAsync(slug);
             if (blog == null)
@@ -202,17 +228,30 @@ namespace DermaKlinik.API.Application.Services
                 blogDto.Category = _mapper.Map<BlogCategoryDto>(blog.Category);
             }
 
-            if (languageId.HasValue)
+            if (!string.IsNullOrEmpty(languageCode))
             {
-                var translation = blog.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
+                var translation = blog.Translations?.FirstOrDefault(t => t.Language?.Code == languageCode);
                 if (translation != null)
                 {
                     blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(translation);
                 }
                 
-                var categoryTranslation = blog.Category?.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
+                var categoryTranslation = blog.Category?.Translations?.FirstOrDefault(t => t.Language?.Code == languageCode);
                 if (categoryTranslation != null)
                     blogDto.CategoryName = categoryTranslation.Name;
+            }
+            else
+            {
+                // Eğer languageCode belirtilmemişse, ilk çeviriyi al
+                var firstTranslation = blog.Translations?.FirstOrDefault();
+                if (firstTranslation != null)
+                {
+                    blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(firstTranslation);
+                }
+                
+                var firstCategoryTranslation = blog.Category?.Translations?.FirstOrDefault();
+                if (firstCategoryTranslation != null)
+                    blogDto.CategoryName = firstCategoryTranslation.Name;
             }
 
             return blogDto;
