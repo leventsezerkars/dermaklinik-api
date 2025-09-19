@@ -1,4 +1,5 @@
 using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Application.DTOs.BlogCategory;
 
 namespace DermaKlinik.API.Application.DTOs.Blog
 {
@@ -13,5 +14,6 @@ namespace DermaKlinik.API.Application.DTOs.Blog
         public DateTime? UpdatedAt { get; set; }
         public List<BlogTranslationDto> Translations { get; set; }
         public BlogTranslationDto CurrentTranslation { get; set; }
+        public BlogCategoryDto Category { get; set; }
     }
 }

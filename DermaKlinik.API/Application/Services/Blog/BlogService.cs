@@ -1,5 +1,6 @@
 using AutoMapper;
 using DermaKlinik.API.Application.DTOs.Blog;
+using DermaKlinik.API.Application.DTOs.BlogCategory;
 using DermaKlinik.API.Core.Interfaces;
 using DermaKlinik.API.Core.Models;
 using DermaKlinik.API.Infrastructure.Repositories;
@@ -33,6 +34,12 @@ namespace DermaKlinik.API.Application.Services
                 throw new Exception("Blog bulunamadı.");
 
             var blogDto = _mapper.Map<BlogDto>(blog);
+            
+            // Kategori bilgilerini ekle
+            if (blog.Category != null)
+            {
+                blogDto.Category = _mapper.Map<BlogCategoryDto>(blog.Category);
+            }
 
             if (languageId.HasValue)
             {
@@ -51,18 +58,27 @@ namespace DermaKlinik.API.Application.Services
             var blogs = await _blogRepository.GetAllAsync(request, categoryId, languageId);
             var blogDtos = _mapper.Map<List<BlogDto>>(blogs);
 
-            if (languageId.HasValue)
+            foreach (var blogDto in blogDtos)
             {
-                foreach (var blogDto in blogDtos)
+                var blog = blogs.FirstOrDefault(b => b.Id == blogDto.Id);
+                
+                // Kategori bilgilerini ekle
+                if (blog?.Category != null)
                 {
-                    var translation = blogs.FirstOrDefault(b => b.Id == blogDto.Id)?.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
+                    blogDto.Category = _mapper.Map<BlogCategoryDto>(blog.Category);
+                }
+
+                if (languageId.HasValue)
+                {
+                    var translation = blog?.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
                     if (translation != null)
                     {
                         blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(translation);
                     }
-                    var category = blogs.FirstOrDefault(b => b.Id == blogDto.Id)?.Category?.Translations.FirstOrDefault(t => t.LanguageId == languageId.Value);
-                    if(category != null)
-                        blogDto.CategoryName = category.Name;
+                    
+                    var categoryTranslation = blog?.Category?.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
+                    if (categoryTranslation != null)
+                        blogDto.CategoryName = categoryTranslation.Name;
                 }
             }
 
@@ -170,6 +186,36 @@ namespace DermaKlinik.API.Application.Services
 
             _blogRepository.Update(blog);
             await _unitOfWork.CompleteAsync();
+        }
+
+        public async Task<BlogDto> GetBySlugAsync(string slug, Guid? languageId = null)
+        {
+            var blog = await _blogRepository.GetBySlugAsync(slug);
+            if (blog == null)
+                throw new Exception("Blog bulunamadı.");
+
+            var blogDto = _mapper.Map<BlogDto>(blog);
+            
+            // Kategori bilgilerini ekle
+            if (blog.Category != null)
+            {
+                blogDto.Category = _mapper.Map<BlogCategoryDto>(blog.Category);
+            }
+
+            if (languageId.HasValue)
+            {
+                var translation = blog.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
+                if (translation != null)
+                {
+                    blogDto.CurrentTranslation = _mapper.Map<BlogTranslationDto>(translation);
+                }
+                
+                var categoryTranslation = blog.Category?.Translations?.FirstOrDefault(t => t.LanguageId == languageId.Value);
+                if (categoryTranslation != null)
+                    blogDto.CategoryName = categoryTranslation.Name;
+            }
+
+            return blogDto;
         }
     }
 }

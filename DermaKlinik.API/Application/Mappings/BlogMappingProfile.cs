@@ -1,5 +1,6 @@
 using AutoMapper;
 using DermaKlinik.API.Application.DTOs.Blog;
+using DermaKlinik.API.Application.DTOs.BlogCategory;
 using DermaKlinik.API.Core.Entities;
 
 namespace DermaKlinik.API.Application.Mappings
@@ -9,7 +10,8 @@ namespace DermaKlinik.API.Application.Mappings
         public BlogMappingProfile()
         {
             CreateMap<Blog, BlogDto>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Translations.FirstOrDefault().Name));
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Translations.FirstOrDefault().Name))
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category));
 
             CreateMap<BlogTranslation, BlogTranslationDto>();
 

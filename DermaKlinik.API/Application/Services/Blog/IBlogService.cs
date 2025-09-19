@@ -14,5 +14,6 @@ namespace DermaKlinik.API.Application.Services
         Task DeleteAsync(Guid id);
         Task HardDeleteAsync(Guid id);
         Task IncrementViewCountAsync(Guid id);
+        Task<BlogDto> GetBySlugAsync(string slug, Guid? languageId = null);
     }
 }

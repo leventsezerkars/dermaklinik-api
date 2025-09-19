@@ -49,5 +49,15 @@ namespace DermaKlinik.API.Infrastructure.Repositories
 
             return await query.ToListAsync();
         }
+
+        public async Task<Blog?> GetBySlugAsync(string slug)
+        {
+            return await _context.Blog
+                .Include(b => b.Category)
+                    .ThenInclude(c => c.Translations)
+                .Include(b => b.Translations)
+                    .ThenInclude(t => t.Language)
+                .FirstOrDefaultAsync(b => b.Translations.Any(t => t.Slug == slug) && b.IsActive);
+        }
     }
 }

@@ -46,11 +46,6 @@ namespace DermaKlinik.API.Application.Mappings
             CreateMap<CreateCompanyInfoDto, CompanyInfo>();
             CreateMap<UpdateCompanyInfoDto, CompanyInfo>();
 
-            // BlogCategory Mappings
-            CreateMap<BlogCategory, BlogCategoryDto>()
-                .ForMember(dest => dest.Translations, opt => opt.MapFrom(src => src.Translations))
-                .ForMember(dest => dest.Blogs, opt => opt.MapFrom(src => src.Blogs));
-
             CreateMap<CreateBlogCategoryDto, BlogCategory>()
                 .ForMember(dest => dest.Translations, opt => opt.Ignore())
                 .ForMember(dest => dest.Blogs, opt => opt.Ignore());
