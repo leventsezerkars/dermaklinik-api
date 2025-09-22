@@ -36,7 +36,7 @@ namespace DermaKlinik.API.Application.Services.Menu
 
         public async Task<MenuDto> GetByIdAsync(Guid id)
         {
-            var menu = await menuRepository.GetByIdAsync(id);
+            var menu = await menuRepository.Query().Include(s=> s.Translations).ThenInclude(s=> s.Language).FirstOrDefaultAsync(s=> s.Id == id);
             return mapper.Map<MenuDto>(menu);
         }
 

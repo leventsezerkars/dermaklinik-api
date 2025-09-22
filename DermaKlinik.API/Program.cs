@@ -28,6 +28,14 @@ using DermaKlinik.API.Infrastructure.Data.Interceptors;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configuration yükleme - Environment-specific dosyalar otomatik yüklenir
+// appsettings.json -> appsettings.{Environment}.json sırasıyla yüklenir
+builder.Configuration
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 // Serilog yapılandırması
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -177,11 +185,13 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Swagger'ı tüm ortamlarda kullanılabilir hale getir
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "DermaKlinik API v1");
+    c.RoutePrefix = "swagger"; // Swagger UI'ı /swagger endpoint'inde erişilebilir yapar
+});
 
 app.UseHttpsRedirection();
 
