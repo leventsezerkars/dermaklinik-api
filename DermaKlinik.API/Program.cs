@@ -25,6 +25,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using DermaKlinik.API.Application.Services.Language;
 using DermaKlinik.API.Infrastructure.Data.Interceptors;
+using DermaKlinik.API.Application.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +86,9 @@ builder.Services.AddScoped<ICompanyInfoRepository, CompanyInfoRepository>();
 builder.Services.AddScoped<IGalleryImageRepository, GalleryImageRepository>();
 builder.Services.AddScoped<IGalleryGroupRepository, GalleryGroupRepository>();
 builder.Services.AddScoped<IGalleryImageGroupMapRepository, GalleryImageGroupMapRepository>();
+
+// Email Service
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserService, UserService>();
