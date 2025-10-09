@@ -24,7 +24,7 @@ namespace DermaKlinik.API.Application.Services.Email
                 var subject = $"İletişim Formu: {emailRequest.Subject}";
                 var body = CreateContactEmailBody(emailRequest);
                 
-                return await SendEmailAsync("info@drmehmetunal.com", subject, body, true);
+                return await SendEmailAsync("iletisim@drmehmetunal.com", subject, body, true);
             }
             catch (Exception ex)
             {
@@ -44,12 +44,14 @@ namespace DermaKlinik.API.Application.Services.Email
             try
             {
                 var emailSettings = _configuration.GetSection("EmailSettings");
+
                 var smtpHost = emailSettings["SmtpHost"];
                 var smtpPort = int.Parse(emailSettings["SmtpPort"] ?? "587");
                 var smtpUsername = emailSettings["SmtpUsername"];
                 var smtpPassword = emailSettings["SmtpPassword"];
                 var fromEmail = emailSettings["FromEmail"];
                 var fromName = emailSettings["FromName"];
+                var enableSsl = bool.Parse(emailSettings["EnableSsl"] ?? "true");
 
                 if (string.IsNullOrEmpty(smtpHost) || string.IsNullOrEmpty(smtpUsername) || string.IsNullOrEmpty(smtpPassword))
                 {
@@ -73,7 +75,26 @@ namespace DermaKlinik.API.Application.Services.Email
                 message.Body = bodyBuilder.ToMessageBody();
 
                 using var client = new SmtpClient();
-                await client.ConnectAsync(smtpHost, smtpPort, SecureSocketOptions.StartTls);
+                
+                // SSL/TLS seçeneklerini port'a göre belirle
+                SecureSocketOptions sslOption;
+                if (smtpPort == 465)
+                {
+                    sslOption = SecureSocketOptions.SslOnConnect;
+                }
+                else if (smtpPort == 587)
+                {
+                    sslOption = SecureSocketOptions.StartTls;
+                }
+                else
+                {
+                    sslOption = enableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
+                }
+
+                // Bağlantı timeout'u ayarla
+                client.Timeout = 30000; // 30 saniye
+
+                await client.ConnectAsync(smtpHost, smtpPort, sslOption);
                 await client.AuthenticateAsync(smtpUsername, smtpPassword);
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
@@ -89,7 +110,7 @@ namespace DermaKlinik.API.Application.Services.Email
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "E-posta gönderilirken hata oluştu: {To}", to);
+                _logger.LogError(ex, "E-posta gönderilirken hata oluştu: {To}. Hata detayı: {ErrorDetails}", to, ex.Message);
                 return new EmailResponseDto
                 {
                     Success = false,
@@ -100,10 +121,10 @@ namespace DermaKlinik.API.Application.Services.Email
             }
         }
 
-        public async Task<EmailResponseDto> SendEmailWithTemplateAsync(string to, string subject, string templateName, object model)
+        public Task<EmailResponseDto> SendEmailWithTemplateAsync(string to, string subject, string templateName, object model)
         {
             // Template sistemi için gelecekte implementasyon yapılabilir
-            throw new NotImplementedException("Template sistemi henüz implement edilmedi");
+            return Task.FromException<EmailResponseDto>(new NotImplementedException("Template sistemi henüz implement edilmedi"));
         }
 
         private string CreateContactEmailBody(EmailRequestDto emailRequest)
