@@ -24,7 +24,25 @@ namespace DermaKlinik.API.Application.Services.Email
                 var subject = $"İletişim Formu: {emailRequest.Subject}";
                 var body = CreateContactEmailBody(emailRequest);
                 
-                return await SendEmailAsync("iletisim@drmehmetunal.com", subject, body, true);
+                // Ana iletişim mailini gönder
+                var mainEmailResult = await SendEmailAsync("iletisim@drmehmetunal.com", subject, body, true);
+                
+                // Ana mail başarılıysa otomatik yanıt maili gönder
+                if (mainEmailResult.Success)
+                {
+                    try
+                    {
+                        await SendAutoReplyEmailAsync(emailRequest.Email, emailRequest.Name);
+                        _logger.LogInformation("Otomatik yanıt maili başarıyla gönderildi: {Email}", emailRequest.Email);
+                    }
+                    catch (Exception autoReplyEx)
+                    {
+                        // Otomatik yanıt maili başarısız olsa bile ana mail gönderilmiş sayılır
+                        _logger.LogWarning(autoReplyEx, "Otomatik yanıt maili gönderilemedi: {Email}", emailRequest.Email);
+                    }
+                }
+                
+                return mainEmailResult;
             }
             catch (Exception ex)
             {
@@ -127,6 +145,28 @@ namespace DermaKlinik.API.Application.Services.Email
             return Task.FromException<EmailResponseDto>(new NotImplementedException("Template sistemi henüz implement edilmedi"));
         }
 
+        public async Task<EmailResponseDto> SendAutoReplyEmailAsync(string to, string name)
+        {
+            try
+            {
+                var subject = "Mesajınız Tarafımıza Ulaşmıştır - Dr. Mehmet Unal Dermotoloji Kliniği";
+                var body = CreateAutoReplyEmailBody(name);
+                
+                return await SendEmailAsync(to, subject, body, true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Otomatik yanıt emaili gönderilirken hata oluştu: {To}", to);
+                return new EmailResponseDto
+                {
+                    Success = false,
+                    Message = "Otomatik yanıt e-postası gönderilirken bir hata oluştu",
+                    ErrorDetails = ex.Message,
+                    SentAt = DateTime.UtcNow
+                };
+            }
+        }
+
         private string CreateContactEmailBody(EmailRequestDto emailRequest)
         {
             var sb = new StringBuilder();
@@ -187,6 +227,72 @@ namespace DermaKlinik.API.Application.Services.Email
             sb.AppendLine($"<div class='value'>{DateTime.Now:dd.MM.yyyy HH:mm}</div>");
             sb.AppendLine("</div>");
 
+            sb.AppendLine("</div>");
+            sb.AppendLine("</body>");
+            sb.AppendLine("</html>");
+
+            return sb.ToString();
+        }
+
+        private string CreateAutoReplyEmailBody(string name)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("<html>");
+            sb.AppendLine("<head><style>");
+            sb.AppendLine("body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8f9fa; }");
+            sb.AppendLine(".container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }");
+            sb.AppendLine(".header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; text-align: center; }");
+            sb.AppendLine(".header h1 { margin: 0; font-size: 28px; font-weight: 300; }");
+            sb.AppendLine(".content { padding: 40px 30px; }");
+            sb.AppendLine(".greeting { font-size: 18px; margin-bottom: 20px; color: #2c3e50; }");
+            sb.AppendLine(".message { font-size: 16px; margin-bottom: 25px; color: #555; line-height: 1.8; }");
+            sb.AppendLine(".highlight { background-color: #e8f4fd; padding: 20px; border-left: 4px solid #3498db; margin: 25px 0; border-radius: 0 5px 5px 0; }");
+            sb.AppendLine(".highlight p { margin: 0; font-weight: 500; color: #2c3e50; }");
+            sb.AppendLine(".contact-info { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 30px; }");
+            sb.AppendLine(".contact-info h3 { margin: 0 0 15px 0; color: #2c3e50; font-size: 18px; }");
+            sb.AppendLine(".contact-info p { margin: 5px 0; color: #666; }");
+            sb.AppendLine(".footer { background-color: #2c3e50; color: white; padding: 20px; text-align: center; font-size: 14px; }");
+            sb.AppendLine(".footer p { margin: 5px 0; }");
+            sb.AppendLine(".logo { font-size: 24px; font-weight: bold; margin-bottom: 10px; }");
+            sb.AppendLine("</style></head>");
+            sb.AppendLine("<body>");
+            sb.AppendLine("<div class='container'>");
+            
+            // Header
+            sb.AppendLine("<div class='header'>");
+            sb.AppendLine("<div class='logo'>DermaKlinik</div>");
+            sb.AppendLine("<h1>Mesajınız Alındı</h1>");
+            sb.AppendLine("</div>");
+            
+            // Content
+            sb.AppendLine("<div class='content'>");
+            sb.AppendLine($"<div class='greeting'>Sayın {name},</div>");
+            
+            sb.AppendLine("<div class='message'>");
+            sb.AppendLine("<p>İletişim formu aracılığıyla gönderdiğiniz mesajınız tarafımıza başarıyla ulaşmıştır.</p>");
+            sb.AppendLine("<p>Mesajınızı en kısa sürede inceleyerek size dönüş sağlayacağız. Değerli vaktinizi ayırdığınız için teşekkür ederiz.</p>");
+            sb.AppendLine("</div>");
+            
+            sb.AppendLine("<div class='highlight'>");
+            sb.AppendLine("<p>📧 Mesajınız en geç 24 saat içinde yanıtlanacaktır.</p>");
+            sb.AppendLine("</div>");
+            
+            sb.AppendLine("<div class='contact-info'>");
+            sb.AppendLine("<h3>📞 Acil Durumlar İçin</h3>");
+            sb.AppendLine("<p>Eğer acil bir durumunuz varsa, lütfen doğrudan telefon numaramızı arayın.</p>");
+            sb.AppendLine("<p><strong>Telefon:</strong> +90 (212) 123 45 67</p>");
+            sb.AppendLine("<p><strong>E-posta:</strong> info@dermaklinik.com</p>");
+            sb.AppendLine("</div>");
+            
+            sb.AppendLine("</div>");
+            
+            // Footer
+            sb.AppendLine("<div class='footer'>");
+            sb.AppendLine("<p><strong>DermaKlinik</strong></p>");
+            sb.AppendLine("<p>Profesyonel Dermatoloji Hizmetleri</p>");
+            sb.AppendLine($"<p>Bu e-posta {DateTime.Now:dd.MM.yyyy HH:mm} tarihinde otomatik olarak gönderilmiştir.</p>");
+            sb.AppendLine("</div>");
+            
             sb.AppendLine("</div>");
             sb.AppendLine("</body>");
             sb.AppendLine("</html>");
