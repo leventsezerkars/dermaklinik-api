@@ -45,12 +45,24 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 // Add services to the container.
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    // Model validation filter'ı ekle
+    options.Filters.Add<DermaKlinik.API.Presentation.Middleware.ModelValidationFilter>();
+    // ASP.NET Core'un varsayılan model validation'ını devre dışı bırak
+    options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+})
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    })
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // ASP.NET Core'un varsayılan Problem Details yanıtını devre dışı bırak
+        options.SuppressMapClientErrors = true;
+        options.SuppressModelStateInvalidFilter = true;
     });
 
 // DbContext Configuration
@@ -197,14 +209,15 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger"; // Swagger UI'ı /swagger endpoint'inde erişilebilir yapar
 });
 
+// Global Exception Middleware - En üstte olmalı
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
 // Static files serving
 app.UseStaticFiles();
 
-// Global Exception Middleware
-app.UseMiddleware<GlobalExceptionMiddleware>();
-
+// CORS
 app.UseCors("DefaultPolicy");
 
 app.UseAuthentication();

@@ -20,7 +20,7 @@ namespace DermaKlinik.API.Application.Services
         private readonly IFileUploadService _fileUploadService;
 
         public GalleryImageService(
-            IGalleryImageRepository galleryImageRepository, 
+            IGalleryImageRepository galleryImageRepository,
             IGalleryImageGroupMapService mapService,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -44,7 +44,7 @@ namespace DermaKlinik.API.Application.Services
 
             var imageDto = _mapper.Map<GalleryImageDto>(image);
             imageDto.Groups = groupDtos;
-            
+
             // Tam URL'yi oluştur
             imageDto.ImageUrl = await _fileUploadService.GetImageUrlAsync(image.ImageUrl);
 
@@ -72,11 +72,14 @@ namespace DermaKlinik.API.Application.Services
                 var groupDtos = groups.Select(g => _mapper.Map<GalleryGroupDto>(g.Group)).ToList();
 
                 var imageDto = _mapper.Map<GalleryImageDto>(image);
+                foreach (var item in groupDtos)
+                {
+                    item.SortOrder = groups.FirstOrDefault(s => s.GroupId == item.Id)?.SortOrder ?? 0;
+                }
                 imageDto.Groups = groupDtos;
-                
                 // Tam URL'yi oluştur
                 imageDto.ImageUrl = await _fileUploadService.GetImageUrlAsync(image.ImageUrl);
-                
+
                 result.Add(imageDto);
             }
 
@@ -87,7 +90,7 @@ namespace DermaKlinik.API.Application.Services
         {
             // Resim dosyasını yükle
             var imagePath = await _fileUploadService.UploadImageAsync(createDto.ImageFile, "gallery");
-            
+
             var image = new GalleryImage
             {
                 ImageUrl = imagePath,
@@ -123,7 +126,7 @@ namespace DermaKlinik.API.Application.Services
             {
                 // Eski dosyayı sil
                 await _fileUploadService.DeleteImageAsync(image.ImageUrl);
-                
+
                 // Yeni dosyayı yükle
                 var newImagePath = await _fileUploadService.UploadImageAsync(updateDto.ImageFile, "gallery");
                 image.ImageUrl = newImagePath;
@@ -197,11 +200,15 @@ namespace DermaKlinik.API.Application.Services
             if (existingMap.Any(gm => gm.GroupId == groupId))
                 return; // Zaten grupta
 
+            var groupImages = await _mapService.GetByGroupIdAsync(groupId);
+
+            var maxOrder = groupImages.Any() ? groupImages.Max(gm => gm.SortOrder) + 1 : 1;
+
             var createDto = new CreateGalleryImageGroupMapDto
             {
                 ImageId = imageId,
                 GroupId = groupId,
-                SortOrder = sortOrder
+                SortOrder = maxOrder
             };
 
             await _mapService.CreateAsync(createDto);

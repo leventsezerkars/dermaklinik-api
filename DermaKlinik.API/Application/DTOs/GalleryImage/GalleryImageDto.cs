@@ -10,5 +10,8 @@ namespace DermaKlinik.API.Application.DTOs.GalleryImage
         public string AltText { get; set; }
         public string Caption { get; set; }
         public List<GalleryGroupDto> Groups { get; set; }
+
+        public int SortOrder { get; set; }
+
     }
 }

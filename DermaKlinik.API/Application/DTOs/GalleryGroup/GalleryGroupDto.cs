@@ -10,5 +10,6 @@ namespace DermaKlinik.API.Application.DTOs.GalleryGroup
         public bool IsDeletable { get; set; }
         public List<GalleryImageDto> Images { get; set; }
         public int ImageCount { get; set; }
+        public int SortOrder { get; set; }
     }
 }
