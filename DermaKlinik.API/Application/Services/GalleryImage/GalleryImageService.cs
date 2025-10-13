@@ -95,6 +95,7 @@ namespace DermaKlinik.API.Application.Services
             {
                 ImageUrl = imagePath,
                 Title = createDto.Title,
+                TitleEn = createDto.TitleEn,
                 AltText = createDto.AltText,
                 Caption = createDto.Caption,
                 IsActive = createDto.IsActive
@@ -134,6 +135,7 @@ namespace DermaKlinik.API.Application.Services
 
             // Diğer alanları güncelle
             image.Title = updateDto.Title;
+            image.TitleEn = updateDto.TitleEn;
             image.AltText = updateDto.AltText;
             image.Caption = updateDto.Caption;
             image.IsActive = updateDto.IsActive;

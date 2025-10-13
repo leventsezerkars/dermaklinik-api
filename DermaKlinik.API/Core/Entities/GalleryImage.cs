@@ -13,6 +13,9 @@ namespace DermaKlinik.API.Core.Entities
         public string Title { get; set; }
 
         [StringLength(255)]
+        public string? TitleEn { get; set; }
+
+        [StringLength(255)]
         public string AltText { get; set; }
 
         [StringLength(255)]

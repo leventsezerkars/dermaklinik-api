@@ -17,6 +17,9 @@ namespace DermaKlinik.API.Application.Validators.GalleryImage
                 .NotEmpty().WithMessage("Başlık boş olamaz")
                 .MaximumLength(255).WithMessage("Başlık 255 karakterden uzun olamaz");
 
+            RuleFor(x => x.TitleEn)
+                .MaximumLength(255).WithMessage("İngilizce başlık 255 karakterden uzun olamaz");
+
             RuleFor(x => x.AltText)
                 .MaximumLength(255).WithMessage("Alt metin 255 karakterden uzun olamaz");
 
