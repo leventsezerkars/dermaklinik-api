@@ -86,7 +86,7 @@ namespace DermaKlinik.API.Presentation.Controllers
                 var testEmail = new EmailRequestDto
                 {
                     Name = "Test Kullanıcı",
-                    Email = "test@example.com",
+                    Email = "leventsezer2011@gmail.com",
                     Subject = "Test E-postası",
                     Message = "Bu bir test e-postasıdır.",
                     Phone = "+90 555 123 45 67"

@@ -1,4 +1,6 @@
 using DermaKlinik.API.Application.DTOs.Email;
+using DermaKlinik.API.Core.Interfaces;
+using DermaKlinik.API.Infrastructure.Repositories;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -10,11 +12,13 @@ namespace DermaKlinik.API.Application.Services.Email
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
+        private readonly ICompanyInfoRepository _companyInfoRepository;
 
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger, ICompanyInfoRepository companyInfoRepository)
         {
             _configuration = configuration;
             _logger = logger;
+            _companyInfoRepository = companyInfoRepository;
         }
 
         public async Task<EmailResponseDto> SendContactEmailAsync(EmailRequestDto emailRequest)
@@ -25,7 +29,7 @@ namespace DermaKlinik.API.Application.Services.Email
                 var body = CreateContactEmailBody(emailRequest);
                 
                 // Ana iletişim mailini gönder
-                var mainEmailResult = await SendEmailAsync("iletisim@drmehmetunal.com", subject, body, true);
+                var mainEmailResult = await SendEmailAsync("contact@drmehmetunal.com", subject, body, true);
                 
                 // Ana mail başarılıysa otomatik yanıt maili gönder
                 if (mainEmailResult.Success)
@@ -149,8 +153,8 @@ namespace DermaKlinik.API.Application.Services.Email
         {
             try
             {
-                var subject = "Mesajınız Tarafımıza Ulaşmıştır - Dr. Mehmet Unal Dermotoloji Kliniği";
-                var body = CreateAutoReplyEmailBody(name);
+                var subject = "Mesajınız Tarafımıza Ulaşmıştır - Doç. Dr. Mehmet Ünal Dermatoloji Kliniği";
+                var body = await CreateAutoReplyEmailBodyAsync(name);
                 
                 return await SendEmailAsync(to, subject, body, true);
             }
@@ -234,8 +238,14 @@ namespace DermaKlinik.API.Application.Services.Email
             return sb.ToString();
         }
 
-        private string CreateAutoReplyEmailBody(string name)
+        private async Task<string> CreateAutoReplyEmailBodyAsync(string name)
         {
+            // CompanyInfo'dan iletişim bilgilerini al
+            var companyInfo = await _companyInfoRepository.GetActiveCompanyInfoAsync();
+            var phone = companyInfo?.Phone ?? "+90 (212) 123 45 67"; // Varsayılan telefon
+            var email = companyInfo?.Email ?? "contact@drmehmetunal.com"; // Varsayılan email
+            var companyName = companyInfo?.Name ?? "Doç. Dr. Mehmet Ünal Dermatoloji Kliniği"; // Varsayılan şirket adı
+            
             var sb = new StringBuilder();
             sb.AppendLine("<html>");
             sb.AppendLine("<head><style>");
@@ -260,7 +270,7 @@ namespace DermaKlinik.API.Application.Services.Email
             
             // Header
             sb.AppendLine("<div class='header'>");
-            sb.AppendLine("<div class='logo'>DermaKlinik</div>");
+            sb.AppendLine($"<div class='logo'>{companyName}</div>");
             sb.AppendLine("<h1>Mesajınız Alındı</h1>");
             sb.AppendLine("</div>");
             
@@ -280,15 +290,15 @@ namespace DermaKlinik.API.Application.Services.Email
             sb.AppendLine("<div class='contact-info'>");
             sb.AppendLine("<h3>📞 Acil Durumlar İçin</h3>");
             sb.AppendLine("<p>Eğer acil bir durumunuz varsa, lütfen doğrudan telefon numaramızı arayın.</p>");
-            sb.AppendLine("<p><strong>Telefon:</strong> +90 (212) 123 45 67</p>");
-            sb.AppendLine("<p><strong>E-posta:</strong> info@dermaklinik.com</p>");
+            sb.AppendLine($"<p><strong>Telefon:</strong> {phone}</p>");
+            sb.AppendLine($"<p><strong>E-posta:</strong> {email}</p>");
             sb.AppendLine("</div>");
             
             sb.AppendLine("</div>");
             
             // Footer
             sb.AppendLine("<div class='footer'>");
-            sb.AppendLine("<p><strong>DermaKlinik</strong></p>");
+            sb.AppendLine($"<p><strong>{companyName}</strong></p>");
             sb.AppendLine("<p>Profesyonel Dermatoloji Hizmetleri</p>");
             sb.AppendLine($"<p>Bu e-posta {DateTime.Now:dd.MM.yyyy HH:mm} tarihinde otomatik olarak gönderilmiştir.</p>");
             sb.AppendLine("</div>");
