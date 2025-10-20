@@ -81,7 +81,9 @@ namespace DermaKlinik.API.Application.Services.Email
                 }
 
                 var message = new MimeMessage();
+                // Set both From and Sender explicitly
                 message.From.Add(new MailboxAddress(fromName, fromEmail));
+                message.Sender = new MailboxAddress(fromName, fromEmail);
                 message.To.Add(new MailboxAddress("", to));
                 message.Subject = subject;
 
@@ -97,7 +99,9 @@ namespace DermaKlinik.API.Application.Services.Email
                 message.Body = bodyBuilder.ToMessageBody();
 
                 using var client = new SmtpClient();
-                
+                // Disable XOAUTH2 to force basic auth when servers advertise it in a confusing way
+                client.AuthenticationMechanisms.Remove("XOAUTH2");
+
                 // SSL/TLS seçeneklerini port'a göre belirle
                 SecureSocketOptions sslOption;
                 if (smtpPort == 465)
@@ -118,7 +122,8 @@ namespace DermaKlinik.API.Application.Services.Email
 
                 await client.ConnectAsync(smtpHost, smtpPort, sslOption);
                 await client.AuthenticateAsync(smtpUsername, smtpPassword);
-                await client.SendAsync(message);
+                // Ensure SMTP envelope sender matches authenticated address
+                await client.SendAsync(message, new MailboxAddress(fromName, fromEmail), new[] { new MailboxAddress("", to) });
                 await client.DisconnectAsync(true);
 
                 _logger.LogInformation("E-posta başarıyla gönderildi: {To}", to);
