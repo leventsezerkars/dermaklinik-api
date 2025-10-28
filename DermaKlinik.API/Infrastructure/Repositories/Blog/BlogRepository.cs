@@ -1,7 +1,9 @@
 using DermaKlinik.API.Core.Entities;
+using DermaKlinik.API.Core.Extensions;
 using DermaKlinik.API.Core.Models;
 using DermaKlinik.API.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace DermaKlinik.API.Infrastructure.Repositories
 {
@@ -29,8 +31,18 @@ namespace DermaKlinik.API.Infrastructure.Repositories
                 .Include(b => b.Category)
                     .ThenInclude(b => b.Translations)
                 .Include(b => b.Translations)
-                .ThenInclude(t => t.Language)
-                .Where(b => b.IsActive);
+                    .ThenInclude(t => t.Language).AsNoTracking();
+
+            if (!request.Search.IsEmpty())
+            {
+                var searchTerm = request.Search.ToLower();
+                query = query.Where(b =>
+                    b.Category.Translations.Any(t => t.Name.ToLower().Contains(searchTerm)) ||
+                    b.Translations.Any(t => t.Content.ToLower().Contains(searchTerm)) ||
+                    b.Translations.Any(t => t.Title.ToLower().Contains(searchTerm)) ||
+                    b.Translations.Any(t => t.Slug.ToLower().Contains(searchTerm))
+                );
+            }
 
             if (categoryId.HasValue)
             {
