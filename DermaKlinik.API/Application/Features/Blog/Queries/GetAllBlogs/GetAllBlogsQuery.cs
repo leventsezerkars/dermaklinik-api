@@ -10,6 +10,7 @@ namespace DermaKlinik.API.Application.Features.Blog.Queries
         public PagingRequestModel PagingRequest { get; set; }
         public Guid? CategoryId { get; set; }
         public Guid? LanguageId { get; set; }
+        public bool? IsActive { get; set; }
     }
 
     public class GetAllBlogsQueryHandler : IRequestHandler<GetAllBlogsQuery, ApiResponse<List<BlogDto>>>
@@ -25,7 +26,7 @@ namespace DermaKlinik.API.Application.Features.Blog.Queries
         {
             try
             {
-                var result = await _blogService.GetAllAsync(request.PagingRequest, request.CategoryId, request.LanguageId);
+                var result = await _blogService.GetAllAsync(request.PagingRequest, request.CategoryId, request.LanguageId, request.IsActive);
                 return ApiResponse<List<BlogDto>>.SuccessResult(result);
             }
             catch (Exception ex)

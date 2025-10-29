@@ -24,13 +24,15 @@ namespace DermaKlinik.API.Presentation.Controllers
         public async Task<ActionResult<List<BlogDto>>> GetAll(
             [FromQuery] PagingRequestModel pagingRequest,
             [FromQuery] Guid? categoryId = null,
-            [FromQuery] Guid? languageId = null)
+            [FromQuery] Guid? languageId = null,
+            [FromQuery] bool? isActive = null)
         {
             var query = new GetAllBlogsQuery 
             { 
                 PagingRequest = pagingRequest,
                 CategoryId = categoryId,
-                LanguageId = languageId
+                LanguageId = languageId,
+                IsActive = isActive
             };
             var result = await _mediator.Send(query);
             return Ok(result);

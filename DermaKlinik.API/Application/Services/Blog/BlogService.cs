@@ -62,9 +62,9 @@ namespace DermaKlinik.API.Application.Services
             return blogDto;
         }
 
-        public async Task<List<BlogDto>> GetAllAsync(PagingRequestModel request, Guid? categoryId = null, Guid? languageId = null)
+        public async Task<List<BlogDto>> GetAllAsync(PagingRequestModel request, Guid? categoryId = null, Guid? languageId = null, bool? isActive = null)
         {
-            var blogs = await _blogRepository.GetAllAsync(request, categoryId, languageId);
+            var blogs = await _blogRepository.GetAllAsync(request, categoryId, languageId, isActive);
             var blogDtos = _mapper.Map<List<BlogDto>>(blogs);
 
             foreach (var blogDto in blogDtos)

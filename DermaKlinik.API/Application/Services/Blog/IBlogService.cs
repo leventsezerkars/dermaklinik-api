@@ -6,7 +6,7 @@ namespace DermaKlinik.API.Application.Services
     public interface IBlogService
     {
         Task<BlogDto> GetByIdAsync(Guid id, Guid? languageId = null);
-        Task<List<BlogDto>> GetAllAsync(PagingRequestModel request, Guid? categoryId = null, Guid? languageId = null);
+        Task<List<BlogDto>> GetAllAsync(PagingRequestModel request, Guid? categoryId = null, Guid? languageId = null, bool? isActive = null);
         Task<BlogDto> CreateAsync(CreateBlogDto createBlogDto);
         Task<BlogTranslationDto> CreateTranslationAsync(CreateBlogTranslationDto createBlogTranslationDto);
         Task<BlogDto> UpdateAsync(Guid id, UpdateBlogDto updateBlogDto);

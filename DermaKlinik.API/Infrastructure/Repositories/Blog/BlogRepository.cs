@@ -25,7 +25,7 @@ namespace DermaKlinik.API.Infrastructure.Repositories
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
-        public async Task<List<Blog>> GetAllAsync(PagingRequestModel request, Guid? categoryId = null, Guid? languageId = null)
+        public async Task<List<Blog>> GetAllAsync(PagingRequestModel request, Guid? categoryId = null, Guid? languageId = null, bool? isActive = null)
         {
             var query = _context.Blog
                 .Include(b => b.Category)
@@ -52,6 +52,11 @@ namespace DermaKlinik.API.Infrastructure.Repositories
             if (languageId.HasValue)
             {
                 query = query.Where(b => b.Translations.Any(t => t.LanguageId == languageId.Value));
+            }
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(b => b.IsActive == isActive.Value);
             }
 
             if (request.Page > 0 && request.Take > 0)
