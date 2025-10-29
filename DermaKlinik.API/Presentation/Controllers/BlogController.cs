@@ -78,6 +78,14 @@ namespace DermaKlinik.API.Presentation.Controllers
             return NoContent();
         }
 
+        [HttpDelete("{id}/hard")]
+        public async Task<IActionResult> HardDelete(Guid id)
+        {
+            var command = new HardDeleteBlogCommand { Id = id };
+            var result = await _mediator.Send(command);
+            return Ok(result);
+        }
+
         [HttpPost("{id}/increment-view")]
         public async Task<IActionResult> IncrementViewCount(Guid id)
         {
